@@ -1,0 +1,1 @@
+Place mccglogo.png here

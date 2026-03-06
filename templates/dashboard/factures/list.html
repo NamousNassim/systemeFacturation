@@ -1,0 +1,185 @@
+{% extends "base_app.html" %}
+
+{% block title %}Factures{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard:home' %}" class="text-slate-400 hover:text-slate-600 transition">Tableau de bord</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none"
+     stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<span class="font-semibold text-slate-800">Factures</span>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'dashboard:facture_create' %}" class="btn btn--primary btn--sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5"><path d="M12 5v14m-7-7h14"/></svg>
+    Nouvelle facture
+</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- KPI summary -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="kpi-card">
+        <p class="kpi-label">Encours total</p>
+        <p class="kpi-value text-money">{{ encours_total|floatformat:2 }}&thinsp;DH</p>
+        <p class="kpi-secondary">Factures envoyées ou en retard</p>
+    </div>
+    <div class="kpi-card kpi--success">
+        <p class="kpi-label">Total payé</p>
+        <p class="kpi-value text-money">{{ paye_total|floatformat:2 }}&thinsp;DH</p>
+        <p class="kpi-secondary">Factures payées</p>
+    </div>
+    <div class="kpi-card kpi--danger">
+        <p class="kpi-label">En retard</p>
+        <p class="kpi-value text-money">{{ retard_total|floatformat:2 }}&thinsp;DH</p>
+        <p class="kpi-secondary">Nécessitent une relance</p>
+    </div>
+</div>
+
+<!-- Page header -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Factures</h1>
+        <p class="page-subtitle">
+            {% if is_paginated %}{{ paginator.count }}{% else %}{{ factures|length }}{% endif %}
+            facture{% if paginator.count != 1 %}s{% endif %}
+        </p>
+    </div>
+</div>
+
+<!-- Filter bar -->
+<form method="get" class="filter-bar">
+    <div class="relative flex-1 min-w-[180px]">
+        <span class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none text-slate-400">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </span>
+        <input type="text" name="q" value="{{ current_q }}"
+               placeholder="N° facture, client, objetâDHÂ¦" class="form-input pl-9">
+    </div>
+    <select name="statut" class="form-select" style="width:auto;min-width:160px">
+        <option value="">Tous les statuts</option>
+        {% for val, label in statuts %}
+        <option value="{{ val }}" {% if current_statut == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn--primary btn--sm">Filtrer</button>
+    {% if current_q or current_statut %}
+    <a href="{% url 'dashboard:facture_list' %}" class="btn btn--secondary btn--sm">Effacer</a>
+    {% endif %}
+</form>
+
+<!-- Table -->
+<div class="card overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>Numéro</th>
+                    <th>Client</th>
+                    <th>Objet</th>
+                    <th>Montant HT</th>
+                    <th>Montant TTC</th>
+                    <th>Statut</th>
+                    <th>Émission</th>
+                    <th>Échéance</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in factures %}
+                <tr>
+                    <td>
+                        <a href="{% url 'dashboard:facture_detail' f.pk %}"
+                           class="font-semibold text-blue-700 hover:text-blue-900">
+                            {{ f.numero }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'dashboard:client_detail' f.client.pk %}"
+                           class="text-slate-700 hover:text-blue-700">
+                            {{ f.client }}
+                        </a>
+                    </td>
+                    <td class="text-slate-500 max-w-[180px] truncate">{{ f.objet }}</td>
+                    <td class="text-money">{{ f.montant_ht|floatformat:2 }}&thinsp;DH</td>
+                    <td class="text-money text-slate-500">{{ f.montant_ttc|floatformat:2 }}&thinsp;DH</td>
+                    <td>
+                        {% if f.statut == 'PAYEE' %}<span class="badge badge--success">Payée</span>
+                        {% elif f.statut == 'ENVOYEE' %}<span class="badge badge--info">Envoyée</span>
+                        {% elif f.statut == 'EN_RETARD' %}<span class="badge badge--danger">En retard</span>
+                        {% elif f.statut == 'BROUILLON' %}<span class="badge badge--neutral">Brouillon</span>
+                        {% elif f.statut == 'ANNULEE' %}<span class="badge badge--neutral">Annulée</span>
+                        {% else %}<span class="badge badge--neutral">{{ f.get_statut_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-slate-400 text-xs whitespace-nowrap">
+                        {{ f.date_emission|date:"d/m/Y" }}
+                    </td>
+                    <td class="text-xs whitespace-nowrap
+                        {% if f.statut == 'EN_RETARD' %}text-rose-600 font-semibold{% else %}text-slate-400{% endif %}">
+                        {% if f.date_echeance %}{{ f.date_echeance|date:"d/m/Y" }}{% else %}—{% endif %}
+                    </td>
+                    <td>
+                        <div class="flex items-center justify-end gap-1.5">
+                            <a href="{% url 'dashboard:facture_detail' f.pk %}"
+                               class="btn btn--ghost btn--sm">Voir</a>
+                            <a href="{% url 'dashboard:facture_update' f.pk %}"
+                               class="btn btn--secondary btn--sm">Modifier</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9">
+                        <div class="empty-state">
+                            <svg class="empty-state-icon" width="44" height="44"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.25">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" x2="8" y1="13" y2="13"/>
+                                <line x1="16" x2="8" y1="17" y2="17"/>
+                            </svg>
+                            <p class="empty-state-title">Aucune facture trouvée</p>
+                            <p class="empty-state-desc">
+                                {% if current_q or current_statut %}
+                                Aucun résultat pour votre recherche.
+                                {% else %}Créez votre première facture.{% endif %}
+                            </p>
+                            {% if not current_q and not current_statut %}
+                            <a href="{% url 'dashboard:facture_create' %}"
+                               class="btn btn--primary btn--sm mt-3">Nouvelle facture</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}{% if current_statut %}&statut={{ current_statut }}{% endif %}"
+           class="page-link">←</a>
+        {% endif %}
+        {% for num in paginator.page_range %}
+        <a href="?page={{ num }}{% if current_q %}&q={{ current_q }}{% endif %}{% if current_statut %}&statut={{ current_statut }}{% endif %}"
+           class="page-link {% if num == page_obj.number %}page-link--active{% endif %}">{{ num }}</a>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}{% if current_statut %}&statut={{ current_statut }}{% endif %}"
+           class="page-link">→</a>
+        {% endif %}
+        <span class="ml-auto text-xs text-slate-400">
+            Page {{ page_obj.number }}&thinsp;/&thinsp;{{ paginator.num_pages }}
+        </span>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

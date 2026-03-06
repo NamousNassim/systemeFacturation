@@ -1,3 +1,4 @@
 Django==4.2.11
 PyMySQL>=1.1,<2
 python-dotenv>=1.0,<2
+whitenoise>=6.6,<7

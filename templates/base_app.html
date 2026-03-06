@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MCCG{% endblock %} — CRM Suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="h-full bg-slate-100 font-sans antialiased">
+
+<!-- Mobile sidebar overlay -->
+<div id="sidebar-overlay"
+     class="fixed inset-0 z-20 bg-black/50 hidden lg:hidden"
+     onclick="closeSidebar()"></div>
+
+<!-- App shell -->
+<div class="min-h-full flex">
+
+    <!-- â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <aside id="sidebar"
+           class="fixed inset-y-0 left-0 z-30 flex w-[240px] flex-col bg-[#0d1b38] -translate-x-full lg:translate-x-0 transition-transform duration-200"
+           aria-label="Navigation principale">
+        {% include "dashboard/partials/sidebar.html" %}
+    </aside>
+
+    <!-- â”€â”€ Main area â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <div class="flex flex-1 min-h-screen flex-col lg:pl-[240px]">
+
+        <!-- Topbar -->
+        <header class="sticky top-0 z-10 flex h-[60px] items-center border-b border-slate-200 bg-white px-4 sm:px-6 gap-3 flex-shrink-0">
+            {% include "dashboard/partials/topbar.html" %}
+        </header>
+
+        <!-- Page content -->
+        <main class="flex-1 px-4 sm:px-6 py-7 w-full max-w-[1440px] mx-auto">
+
+            {% if messages %}
+            <div class="mb-5 space-y-2" id="flash-container">
+                {% for message in messages %}
+                <div class="flex items-center gap-3 rounded-lg border px-4 py-2.5 text-sm
+                    {% if 'success' in message.tags %}bg-emerald-50 border-emerald-200 text-emerald-800
+                    {% elif 'error' in message.tags %}bg-rose-50 border-rose-200 text-rose-800
+                    {% elif 'warning' in message.tags %}bg-amber-50 border-amber-200 text-amber-800
+                    {% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %}">
+                    <span class="flex-1 font-medium">{{ message }}</span>
+                    <button type="button"
+                            onclick="this.parentElement.remove()"
+                            class="flex-shrink-0 opacity-40 hover:opacity-80 transition">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5">
+                            <path d="M18 6 6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+    </div>
+</div>
+
+<script>
+function openSidebar() {
+    document.getElementById('sidebar').classList.remove('-translate-x-full');
+    document.getElementById('sidebar-overlay').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.add('-translate-x-full');
+    document.getElementById('sidebar-overlay').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,5 @@
+DB_NAME=facturationdb
+DB_USER=mccgcom_crmadmin
+DB_PASSWORD=N@ssimzaz12
+DB_HOST=localhost
+DB_PORT=3306

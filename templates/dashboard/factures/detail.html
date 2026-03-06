@@ -1,0 +1,179 @@
+{% extends "base_app.html" %}
+
+{% block title %}{{ facture.numero }}{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard:home' %}" class="text-slate-400 hover:text-slate-600 transition">Tableau de bord</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none"
+     stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<a href="{% url 'dashboard:facture_list' %}" class="text-slate-400 hover:text-slate-600 transition">Factures</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none"
+     stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<span class="font-semibold text-slate-800">{{ facture.numero }}</span>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'dashboard:facture_update' facture.pk %}" class="btn btn--primary btn--sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Modifier
+</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-5">
+
+    <!-- Main document -->
+    <div class="space-y-5">
+
+        <!-- Header card -->
+        <div class="card card-body">
+            <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.08em] text-slate-400 mb-1">Facture</p>
+                    <h1 class="text-2xl font-bold text-slate-900">{{ facture.numero }}</h1>
+                    <p class="text-slate-500 mt-1">{{ facture.objet }}</p>
+                </div>
+                <div class="text-right">
+                    {% if facture.statut == 'PAYEE' %}<span class="badge badge--success">Payée</span>
+                    {% elif facture.statut == 'ENVOYEE' %}<span class="badge badge--info">Envoyée</span>
+                    {% elif facture.statut == 'EN_RETARD' %}<span class="badge badge--danger">En retard</span>
+                    {% elif facture.statut == 'BROUILLON' %}<span class="badge badge--neutral">Brouillon</span>
+                    {% elif facture.statut == 'ANNULEE' %}<span class="badge badge--neutral">Annulée</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Dates + Client -->
+            <div class="info-grid mb-6">
+                <div class="info-item">
+                    <p class="info-label">Client</p>
+                    <a href="{% url 'dashboard:client_detail' facture.client.pk %}"
+                       class="info-value text-blue-700 hover:underline">
+                        {{ facture.client }}
+                    </a>
+                </div>
+                <div class="info-item">
+                    <p class="info-label">Date d'émission</p>
+                    <p class="info-value">{{ facture.date_emission|date:"d/m/Y" }}</p>
+                </div>
+                <div class="info-item">
+                    <p class="info-label">Date d'échéance</p>
+                    <p class="info-value {% if facture.statut == 'EN_RETARD' %}text-rose-700{% endif %}">
+                        {% if facture.date_echeance %}{{ facture.date_echeance|date:"d/m/Y" }}{% else %}—{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Lines -->
+            {% if lignes %}
+            <div class="border border-slate-200 rounded-lg overflow-hidden mb-6">
+                <table class="crm-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-right">Qté</th>
+                            <th class="text-right">P.U. HT</th>
+                            <th class="text-right">Montant HT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ligne in lignes %}
+                        <tr>
+                            <td>{{ ligne.description }}</td>
+                            <td class="text-right text-money">{{ ligne.quantite }}</td>
+                            <td class="text-right text-money">{{ ligne.prix_unitaire|floatformat:2 }}&thinsp;DH</td>
+                            <td class="text-right text-money font-semibold">{{ ligne.montant|floatformat:2 }}&thinsp;DH</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <!-- Totals -->
+            <div class="flex justify-end">
+                <div class="w-72 space-y-2 text-sm">
+                    <div class="flex justify-between text-slate-600">
+                        <span>Montant HT</span>
+                        <span class="text-money">{{ facture.montant_ht|floatformat:2 }}&thinsp;DH</span>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                        <span>TVA ({{ facture.taux_tva }}%)</span>
+                        <span class="text-money">
+                            {% widthratio facture.montant_ht 100 facture.taux_tva %}&thinsp;DH
+                        </span>
+                    </div>
+                    <div class="flex justify-between font-bold text-slate-900 text-base
+                                border-t border-slate-200 pt-2">
+                        <span>Total TTC</span>
+                        <span class="text-money">{{ facture.montant_ttc|floatformat:2 }}&thinsp;DH</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if facture.notes %}
+            <hr class="section-divider">
+            <div>
+                <p class="info-label mb-1">Notes</p>
+                <p class="text-sm text-slate-600 leading-relaxed">{{ facture.notes|linebreaksbr }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-4">
+        <div class="card card-body">
+            <p class="text-xs font-bold uppercase tracking-[0.07em] text-slate-400 mb-3">Résumé</p>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-xs text-slate-400">Statut</dt>
+                    <dd class="mt-0.5">
+                        {% if facture.statut == 'PAYEE' %}<span class="badge badge--success">Payée</span>
+                        {% elif facture.statut == 'ENVOYEE' %}<span class="badge badge--info">Envoyée</span>
+                        {% elif facture.statut == 'EN_RETARD' %}<span class="badge badge--danger">En retard</span>
+                        {% elif facture.statut == 'BROUILLON' %}<span class="badge badge--neutral">Brouillon</span>
+                        {% else %}<span class="badge badge--neutral">{{ facture.get_statut_display }}</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-slate-400">Montant HT</dt>
+                    <dd class="text-base font-bold text-slate-800 text-money">
+                        {{ facture.montant_ht|floatformat:2 }}&thinsp;DH
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-slate-400">Montant TTC</dt>
+                    <dd class="text-base font-bold text-blue-700 text-money">
+                        {{ facture.montant_ttc|floatformat:2 }}&thinsp;DH
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-slate-400">TVA</dt>
+                    <dd class="text-sm font-medium text-slate-700">{{ facture.taux_tva }}%</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-slate-400">Créée le</dt>
+                    <dd class="text-sm font-medium text-slate-700">{{ facture.created_at|date:"d/m/Y à H:i" }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        <a href="{% url 'dashboard:facture_update' facture.pk %}"
+           class="btn btn--secondary w-full justify-center">
+            Modifier la facture
+        </a>
+        <a href="{% url 'dashboard:facture_list' %}"
+           class="btn btn--ghost w-full justify-center">
+            ← Retour aux factures
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

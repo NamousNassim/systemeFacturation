@@ -1,0 +1,242 @@
+{% extends "base_app.html" %}
+
+{% block title %}{{ action }}{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard:home' %}" class="text-slate-400 hover:text-slate-600 transition">Tableau de bord</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<a href="{% url 'dashboard:facture_list' %}" class="text-slate-400 hover:text-slate-600 transition">Factures</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<span class="font-semibold text-slate-800">{{ action }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl">
+    <div class="mb-6">
+        <h1 class="page-title">{{ action }}</h1>
+        {% if facture %}
+        <p class="page-subtitle">Numéro : {{ facture.numero }}</p>
+        {% endif %}
+    </div>
+
+    <form method="post" novalidate id="facture-form">
+        {% csrf_token %}
+
+        <!-- Informations -->
+        <div class="card card-body mb-4">
+            <p class="form-section-title">Informations générales</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                    <label class="form-label">{{ form.client.label }} <span class="text-rose-500">*</span></label>
+                    {{ form.client }}
+                    {% if form.client.errors %}<p class="form-error">{{ form.client.errors|striptags }}</p>{% endif %}
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="form-label">{{ form.objet.label }} <span class="text-rose-500">*</span></label>
+                    {{ form.objet }}
+                    {% if form.objet.errors %}<p class="form-error">{{ form.objet.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="form-label">{{ form.date_emission.label }}</label>
+                    {{ form.date_emission }}
+                    {% if form.date_emission.errors %}<p class="form-error">{{ form.date_emission.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="form-label">{{ form.date_echeance.label }}</label>
+                    {{ form.date_echeance }}
+                    {% if form.date_echeance.errors %}<p class="form-error">{{ form.date_echeance.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="form-label">{{ form.statut.label }}</label>
+                    {{ form.statut }}
+                    {% if form.statut.errors %}<p class="form-error">{{ form.statut.errors|striptags }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Montants -->
+        <div class="card card-body mb-4">
+            <p class="form-section-title">Montant</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                <div>
+                    <label class="form-label">{{ form.montant_ht.label }}</label>
+                    <div class="relative">
+                        {{ form.montant_ht }}
+                        <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400 text-sm">DH</span>
+                    </div>
+                    {% if form.montant_ht.errors %}<p class="form-error">{{ form.montant_ht.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="form-label">{{ form.taux_tva.label }}</label>
+                    <div class="relative">
+                        {{ form.taux_tva }}
+                        <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400 text-sm">%</span>
+                    </div>
+                    {% if form.taux_tva.errors %}<p class="form-error">{{ form.taux_tva.errors|striptags }}</p>{% endif %}
+                </div>
+                <div>
+                    <p class="form-label text-slate-400">Montant TTC (calculé)</p>
+                    <div class="form-input bg-slate-50 text-slate-700 text-money font-semibold" id="ttc-display">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lignes de facturation -->
+        <div class="card card-body mb-4">
+            <div class="flex items-center justify-between mb-4">
+                <p class="form-section-title" style="margin:0;border:none;padding:0">Lignes de facturation</p>
+                <button type="button" id="add-line" class="btn btn--secondary btn--sm">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14m-7-7h14"/></svg>
+                    Ajouter une ligne
+                </button>
+            </div>
+
+            {{ lignes_formset.management_form }}
+
+            <div class="hidden sm:grid grid-cols-[1fr_80px_100px_auto] gap-3 mb-2 px-1">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Description</p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 text-right">Qté</p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 text-right">P.U. HT</p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 text-right">Total HT</p>
+            </div>
+
+            <div id="lignes-container" class="space-y-2">
+                {% for lf in lignes_formset %}
+                <div class="ligne-row" id="ligne-{{ forloop.counter0 }}">
+                    {% for hidden in lf.hidden_fields %}{{ hidden }}{% endfor %}
+                    <div>
+                        {{ lf.description }}
+                        {% if lf.description.errors %}<p class="form-error">{{ lf.description.errors|striptags }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <input type="number" step="0.01" min="0" name="{{ lf.quantite.html_name }}"
+                               value="{{ lf.quantite.value|default:1 }}" class="form-input ligne-qty text-right" placeholder="1">
+                    </div>
+                    <div>
+                        <input type="number" step="0.01" min="0" name="{{ lf.prix_unitaire.html_name }}"
+                               value="{{ lf.prix_unitaire.value|default:'' }}" class="form-input ligne-pu text-right" placeholder="0.00">
+                    </div>
+                    <div class="flex items-center justify-end gap-2">
+                        <span class="text-money text-sm ligne-total text-slate-700 min-w-[70px] text-right">—</span>
+                        {% if lf.DELETE %}
+                        <label class="flex items-center" title="Supprimer">
+                            {{ lf.DELETE }}
+                            <span class="sr-only">Supprimer</span>
+                        </label>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-4 flex justify-end">
+                <div class="w-56 space-y-1.5 text-sm border-t border-slate-100 pt-3">
+                    <div class="flex justify-between text-slate-500">
+                        <span>Sous-total lignes</span>
+                        <span class="text-money" id="lines-subtotal">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="card card-body mb-6">
+            <p class="form-section-title">Notes</p>
+            <label class="form-label">{{ form.notes.label }}</label>
+            {{ form.notes }}
+            <p class="form-hint">Non imprimée sur la facture client (usage interne)</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button type="submit" class="btn btn--primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a 2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                {{ submit_label }}
+            </button>
+            <a href="{% url 'dashboard:facture_list' %}" class="btn btn--secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const htInput  = document.querySelector('[name$="montant_ht"]');
+    const tvaInput = document.querySelector('[name$="taux_tva"]');
+    const ttcEl    = document.getElementById('ttc-display');
+
+    function updateTTC() {
+        const ht  = parseFloat(htInput && htInput.value)  || 0;
+        const tva = parseFloat(tvaInput && tvaInput.value) || 0;
+        const ttc = ht * (1 + tva / 100);
+        if (ttcEl) ttcEl.textContent = ttc ? ttc.toFixed(2) + ' DH' : '—';
+    }
+    if (htInput)  htInput.addEventListener('input', updateTTC);
+    if (tvaInput) tvaInput.addEventListener('input', updateTTC);
+    updateTTC();
+
+    const container   = document.getElementById('lignes-container');
+    const totalForms  = document.querySelector('[name$="-TOTAL_FORMS"]');
+
+    function updateLineTotals() {
+        let total = 0;
+        document.querySelectorAll('.ligne-row').forEach(function (row) {
+            const qty = parseFloat(row.querySelector('.ligne-qty')?.value) || 0;
+            const pu  = parseFloat(row.querySelector('.ligne-pu')?.value)  || 0;
+            const amt = qty * pu;
+            total += amt;
+            const el = row.querySelector('.ligne-total');
+            if (el) el.textContent = amt ? amt.toFixed(2) + ' DH' : '—';
+        });
+        const sub = document.getElementById('lines-subtotal');
+        if (sub) sub.textContent = total ? total.toFixed(2) + ' DH' : '—';
+    }
+
+    document.addEventListener('input', function (e) {
+        if (e.target.classList.contains('ligne-qty') ||
+            e.target.classList.contains('ligne-pu')) {
+            updateLineTotals();
+        }
+    });
+    updateLineTotals();
+
+    const addBtn = document.getElementById('add-line');
+    if (addBtn && container && totalForms) {
+        addBtn.addEventListener('click', function () {
+            const count = parseInt(totalForms.value, 10);
+            const prefix = totalForms.name.replace('-TOTAL_FORMS', '');
+            const html = '<div class="ligne-row">' +
+                '<div><input type="text" name="' + prefix + '-' + count + '-description"' +
+                ' class="form-input" placeholder="Description de la prestation"></div>' +
+                '<div><input type="number" step="0.01" min="0" name="' + prefix + '-' + count + '-quantite"' +
+                ' value="1" class="form-input ligne-qty text-right" placeholder="1"></div>' +
+                '<div><input type="number" step="0.01" min="0" name="' + prefix + '-' + count + '-prix_unitaire"' +
+                ' class="form-input ligne-pu text-right" placeholder="0.00"></div>' +
+                '<div class="flex items-center justify-end">' +
+                '<span class="text-money text-sm ligne-total text-slate-700 min-w-[70px] text-right">—</span>' +
+                '</div>' +
+                '<input type="hidden" name="' + prefix + '-' + count + '-id" value="">' +
+                '</div>';
+            container.insertAdjacentHTML('beforeend', html);
+            totalForms.value = count + 1;
+            updateLineTotals();
+        });
+    }
+
+    document.querySelectorAll('.ligne-row input[type=checkbox]').forEach(function (cb) {
+        cb.style.display = 'none';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = '×';
+        btn.className = 'text-slate-400 hover:text-rose-600 text-lg font-bold leading-none transition';
+        btn.title = 'Supprimer la ligne';
+        btn.addEventListener('click', function () {
+            cb.checked = true;
+            this.closest('.ligne-row').style.opacity = '0.3';
+            updateLineTotals();
+        });
+        cb.parentNode.appendChild(btn);
+    });
+})();
+</script>
+{% endblock %}

@@ -1,12 +1,13 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MCCG CRM{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -14,7 +15,20 @@
                 extend: {
                     fontFamily: { sans: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'] },
                     colors: {
-                        slateglass: '#0b1222'
+                        brand: {
+                            50: '#eef5ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        accent: '#10b981',
+                        ink: '#0f172a'
                     }
                 }
             }
@@ -23,102 +37,63 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <style>
         /* Fallback minimal styles if Tailwind CDN fails */
-        :root { font-family: 'Space Grotesk', 'Segoe UI', sans-serif; }
-        body {
-            background: radial-gradient(1200px at 10% 20%, rgba(16, 185, 129, 0.08), transparent),
-                        radial-gradient(800px at 90% 10%, rgba(56, 189, 248, 0.08), transparent),
-                        #0b1222;
-            color: #e2e8f0;
-            margin: 0;
-        }
-        a { color: #34d399; text-decoration: none; }
+        :root { font-family: 'Inter', 'Space Grotesk', 'Segoe UI', sans-serif; color: #0f172a; background: #f5f7fb; }
+        body { margin: 0; }
+        a { color: #2563eb; text-decoration: none; }
         a:hover { text-decoration: underline; }
-        input, button, textarea, select {
-            font: inherit;
-        }
-        button {
-            background: #34d399;
-            color: #0f172a;
-            border: none;
-            padding: 10px 14px;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-        input, textarea, select {
-            width: 100%;
-            background: #0f172a;
-            border: 1px solid #1f2937;
-            color: #e2e8f0;
-            padding: 10px 12px;
-            border-radius: 10px;
-        }
+        input, button, textarea, select { font: inherit; }
+        button { cursor: pointer; }
     </style>
 </head>
-<body class="min-h-screen bg-slateglass text-slate-100 antialiased" hx-boost="true" hx-target="#page">
-    <div class="fixed inset-0 -z-10 opacity-60 blur-3xl pointer-events-none">
-        <div class="absolute top-8 left-16 h-48 w-48 rounded-full bg-emerald-400/20"></div>
-        <div class="absolute bottom-12 right-24 h-56 w-56 rounded-full bg-cyan-400/20"></div>
+<body class="min-h-screen bg-[#f5f7fb] text-ink antialiased">
+    <div class="fixed inset-0 -z-10 opacity-70 pointer-events-none">
+        <div class="absolute -top-20 -left-10 h-72 w-72 rounded-full bg-brand-200 blur-3xl"></div>
+        <div class="absolute top-10 right-[-80px] h-80 w-80 rounded-full bg-emerald-200 blur-3xl"></div>
     </div>
 
-    <div class="min-h-screen flex">
-        {% if user.is_authenticated %}
-            <aside class="w-64 hidden md:flex flex-col border-r border-slate-800 bg-slate-900/70 backdrop-blur px-5 py-6 gap-6">
+    <div class="min-h-screen flex flex-col">
+        <header class="sticky top-0 z-20 border-b border-slate-200/80 bg-white/80 backdrop-blur">
+            <div class="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4 gap-4">
                 <div class="flex items-center gap-3">
-                    <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500 text-slate-900 font-bold text-lg">M</span>
+                    <div class="h-12 w-12 rounded-2xl overflow-hidden bg-white flex items-center justify-center">
+                        <img src="{% static 'images/mccglogo.png' %}" alt="MCCG" class="h-full w-full object-contain" loading="lazy">
+                    </div>
                     <div>
-                        <p class="text-xs uppercase tracking-[0.18em] text-emerald-300">MCCG CRM</p>
-                        <p class="text-sm font-semibold text-slate-50">Gestion factures & clients</p>
+                        <p class="text-xs uppercase tracking-[0.22em] text-brand-600 font-semibold">MCCG</p>
+                        <p class="text-base sm:text-lg font-semibold text-ink">Client & Facturation Suite</p>
                     </div>
                 </div>
-                <nav class="flex-1 space-y-2 text-sm font-medium text-slate-200">
-                    <a href="/" class="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-slate-800 transition">Tableau de bord</a>
-                </nav>
-                <div class="text-xs text-slate-500">Version CRM • Préparation</div>
-            </aside>
-        {% endif %}
 
-        <div class="flex-1 flex flex-col">
-            <header class="border-b border-slate-800/70 bg-slate-900/60 backdrop-blur">
-                <div class="max-w-6xl mx-auto flex items-center justify-between px-6 py-4 gap-4">
-                    <div class="flex items-center gap-3">
-                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500 text-slate-900 font-bold text-lg">M</span>
-                        <div>
-                            <p class="text-xs uppercase tracking-[0.18em] text-emerald-300">MCCG CRM</p>
-                            <p class="text-sm md:text-lg font-semibold text-slate-50">Gestion factures & clients</p>
+                <div class="flex items-center gap-3">
+                    {% if user.is_authenticated %}
+                        <div class="text-right hidden sm:block">
+                            <p class="text-sm font-semibold text-ink">{{ user.get_full_name|default:user.email }}</p>
+                            <p class="text-xs text-slate-500">Connecté</p>
                         </div>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                        {% if user.is_authenticated %}
-                            <div class="text-right">
-                                <p class="text-sm font-semibold">{{ user.get_full_name|default:user.email }}</p>
-                                <p class="text-xs text-slate-400">Connecté</p>
-                            </div>
-                            <a href="{% url 'accounts:logout' %}" class="inline-flex items-center gap-2 rounded-lg bg-slate-100 text-slate-900 px-3 py-2 text-sm font-semibold hover:translate-y-[1px] transition">
-                                Déconnexion
-                            </a>
-                        {% else %}
-                            <a href="{% url 'accounts:login' %}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 text-slate-900 px-3 py-2 text-sm font-semibold hover:translate-y-[1px] transition">
-                                Connexion
-                            </a>
-                        {% endif %}
-                    </div>
+                        <a href="{% url 'accounts:logout' %}" class="inline-flex items-center gap-2 rounded-xl bg-ink text-white px-3.5 py-2 text-sm font-semibold hover:-translate-y-[1px] shadow-md shadow-brand-200/60 transition">
+                            Déconnexion
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 text-white px-3.5 py-2 text-sm font-semibold hover:-translate-y-[1px] shadow-md shadow-brand-200/60 transition">
+                            Connexion
+                        </a>
+                    {% endif %}
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <main id="page" class="max-w-6xl mx-auto px-6 py-10 w-full">
-                {% if messages %}
-                    <div class="space-y-3 mb-6">
-                        {% for message in messages %}
-                            <div class="rounded-lg border border-emerald-400/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                {% block content %}{% endblock %}
-            </main>
-        </div>
+        <main id="page" class="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-10">
+            {% if messages %}
+                <div class="space-y-3 mb-6">
+                    {% for message in messages %}
+                        <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
     </div>
 </body>
 </html>

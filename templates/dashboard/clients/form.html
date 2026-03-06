@@ -1,0 +1,135 @@
+{% extends "base_app.html" %}
+
+{% block title %}{{ action }}{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard:home' %}" class="text-slate-400 hover:text-slate-600 transition">Tableau de bord</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none"
+     stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<a href="{% url 'dashboard:client_list' %}" class="text-slate-400 hover:text-slate-600 transition">Clients</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none"
+     stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<span class="font-semibold text-slate-800">{{ action }}</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-2xl">
+
+    <div class="mb-6">
+        <h1 class="page-title">{{ action }}</h1>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Section: Identité -->
+        <div class="card card-body mb-4">
+            <p class="form-section-title">Identité</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div>
+                    <label class="form-label">{{ form.nom.label }}</label>
+                    {{ form.nom }}
+                    {% if form.nom.errors %}
+                    <p class="form-error">{{ form.nom.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="form-label">{{ form.prenom.label }}</label>
+                    {{ form.prenom }}
+                    {% if form.prenom.errors %}
+                    <p class="form-error">{{ form.prenom.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="form-label">{{ form.societe.label }}</label>
+                    {{ form.societe }}
+                    {% if form.societe.errors %}
+                    <p class="form-error">{{ form.societe.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="form-label">{{ form.siret.label }}</label>
+                    {{ form.siret }}
+                    <p class="form-hint">14 chiffres sans espaces</p>
+                    {% if form.siret.errors %}
+                    <p class="form-error">{{ form.siret.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="form-label">{{ form.statut.label }}</label>
+                    {{ form.statut }}
+                    {% if form.statut.errors %}
+                    <p class="form-error">{{ form.statut.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Section: Contact -->
+        <div class="card card-body mb-4">
+            <p class="form-section-title">Contact</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div>
+                    <label class="form-label">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <p class="form-error">{{ form.email.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="form-label">{{ form.telephone.label }}</label>
+                    {{ form.telephone }}
+                    {% if form.telephone.errors %}
+                    <p class="form-error">{{ form.telephone.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="form-label">{{ form.adresse.label }}</label>
+                    {{ form.adresse }}
+                    {% if form.adresse.errors %}
+                    <p class="form-error">{{ form.adresse.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Section: Notes -->
+        <div class="card card-body mb-6">
+            <p class="form-section-title">Notes internes</p>
+            <div>
+                <label class="form-label">{{ form.notes.label }}</label>
+                {{ form.notes }}
+                <p class="form-hint">Visible uniquement par votre équipe</p>
+                {% if form.notes.errors %}
+                <p class="form-error">{{ form.notes.errors|striptags }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-3">
+            <button type="submit" class="btn btn--primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/></svg>
+                {{ submit_label }}
+            </button>
+            <a href="{% url 'dashboard:client_list' %}" class="btn btn--secondary">Annuler</a>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

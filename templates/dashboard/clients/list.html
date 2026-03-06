@@ -1,0 +1,164 @@
+{% extends "base_app.html" %}
+
+{% block title %}Clients{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard:home' %}"
+   class="text-slate-400 hover:text-slate-600 transition">Tableau de bord</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24"
+     fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<span class="font-semibold text-slate-800">Clients</span>
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'dashboard:client_create' %}" class="btn btn--primary btn--sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.5"><path d="M12 5v14m-7-7h14"/></svg>
+    Nouveau client
+</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Clients</h1>
+        <p class="page-subtitle">
+            {% if is_paginated %}{{ paginator.count }}{% else %}{{ clients|length }}{% endif %}
+            client{% if paginator.count != 1 %}s{% endif %} au total
+        </p>
+    </div>
+</div>
+
+<!-- Filter bar -->
+<form method="get" class="filter-bar">
+    <div class="relative flex-1 min-w-[180px]">
+        <span class="absolute inset-y-0 left-2.5 flex items-center pointer-events-none text-slate-400">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </span>
+        <input type="text" name="q" value="{{ current_q }}"
+               placeholder="Rechercher un client…"
+               class="form-input pl-9">
+    </div>
+    <select name="statut" class="form-select" style="width:auto;min-width:150px">
+        <option value="">Tous les statuts</option>
+        {% for val, label in statuts %}
+        <option value="{{ val }}" {% if current_statut == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn--primary btn--sm">Filtrer</button>
+    {% if current_q or current_statut %}
+    <a href="{% url 'dashboard:client_list' %}" class="btn btn--secondary btn--sm">Effacer</a>
+    {% endif %}
+</form>
+
+<!-- Table -->
+<div class="card overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>Nom / Société</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Statut</th>
+                    <th>Créé le</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                <tr>
+                    <td>
+                        <div class="font-semibold text-slate-800">
+                            {{ client.nom }}{% if client.prenom %} {{ client.prenom }}{% endif %}
+                        </div>
+                        {% if client.societe %}
+                        <div class="text-xs text-slate-400 mt-0.5">{{ client.societe }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="text-slate-500">{{ client.email|default:"—" }}</td>
+                    <td class="text-slate-500">{{ client.telephone|default:"—" }}</td>
+                    <td>
+                        {% if client.statut == 'ACTIF' %}
+                        <span class="badge badge--success">Actif</span>
+                        {% else %}
+                        <span class="badge badge--neutral">Inactif</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-slate-400 text-xs whitespace-nowrap">
+                        {{ client.created_at|date:"d/m/Y" }}
+                    </td>
+                    <td>
+                        <div class="flex items-center justify-end gap-1.5">
+                            <a href="{% url 'dashboard:client_detail' client.pk %}"
+                               class="btn btn--ghost btn--sm">Voir</a>
+                            <a href="{% url 'dashboard:client_update' client.pk %}"
+                               class="btn btn--secondary btn--sm">Modifier</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <svg class="empty-state-icon" width="44" height="44"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.25">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                            <p class="empty-state-title">Aucun client trouvé</p>
+                            <p class="empty-state-desc">
+                                {% if current_q or current_statut %}
+                                Aucun résultat pour votre recherche.
+                                {% else %}
+                                Ajoutez votre premier client pour commencer.
+                                {% endif %}
+                            </p>
+                            {% if not current_q and not current_statut %}
+                            <a href="{% url 'dashboard:client_create' %}"
+                               class="btn btn--primary btn--sm mt-3">Nouveau client</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}{% if current_statut %}&statut={{ current_statut }}{% endif %}"
+           class="page-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        {% endif %}
+        {% for num in paginator.page_range %}
+        <a href="?page={{ num }}{% if current_q %}&q={{ current_q }}{% endif %}{% if current_statut %}&statut={{ current_statut }}{% endif %}"
+           class="page-link {% if num == page_obj.number %}page-link--active{% endif %}">
+            {{ num }}
+        </a>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if current_q %}&q={{ current_q }}{% endif %}{% if current_statut %}&statut={{ current_statut }}{% endif %}"
+           class="page-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        {% endif %}
+        <span class="ml-auto text-xs text-slate-400">
+            Page {{ page_obj.number }}&thinsp;/&thinsp;{{ paginator.num_pages }}
+        </span>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
