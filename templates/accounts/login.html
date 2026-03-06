@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] grid place-items-center px-4">
+    <div class="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl shadow-emerald-900/20 backdrop-blur">
+        <p class="text-emerald-300 uppercase tracking-[0.2em] text-xs mb-2">Accès sécurisé</p>
+        <h1 class="text-2xl font-semibold text-slate-50 mb-2">Connexion MCCG</h1>
+        <p class="text-sm text-slate-400 mb-6">Gérez vos clients, factures et relances depuis un tableau de bord unifié.</p>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-100">
+                    {{ form.non_field_errors|striptags }}
+                </div>
+            {% endif %}
+
+            <div>
+                <label for="{{ form.username.id_for_label }}" class="text-sm font-medium text-slate-200">Email</label>
+                <input
+                    type="email"
+                    name="{{ form.username.name }}"
+                    id="{{ form.username.id_for_label }}"
+                    value="{{ form.username.value|default_if_none:'' }}"
+                    autocomplete="email"
+                    required
+                    class="w-full mt-1 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-slate-100 focus:border-emerald-400 focus:ring-emerald-400 focus:outline-none"
+                    placeholder="email@entreprise.com"
+                />
+                {% if form.username.errors %}
+                    <p class="text-sm text-red-300 mt-1">{{ form.username.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.password.id_for_label }}" class="text-sm font-medium text-slate-200">Mot de passe</label>
+                <input
+                    type="password"
+                    name="{{ form.password.name }}"
+                    id="{{ form.password.id_for_label }}"
+                    autocomplete="current-password"
+                    required
+                    class="w-full mt-1 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-slate-100 focus:border-emerald-400 focus:ring-emerald-400 focus:outline-none"
+                    placeholder="••••••••"
+                />
+                {% if form.password.errors %}
+                    <p class="text-sm text-red-300 mt-1">{{ form.password.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <button type="submit"
+                class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 text-slate-900 px-4 py-3 font-semibold hover:-translate-y-[1px] transition">
+                Se connecter
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

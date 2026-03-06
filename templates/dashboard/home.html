@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<section class="space-y-8">
+    <div class="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-emerald-900/20">
+        <p class="text-sm text-emerald-300 uppercase tracking-[0.18em]">Bonjour {{ user.get_full_name|default:user.username }}</p>
+        <h1 class="text-3xl font-semibold text-slate-50 mt-2">Tableau de bord CRM</h1>
+        <p class="text-slate-300 mt-3 max-w-2xl">
+            Centralisez vos clients, factures et relances. Ajoutez vos premiers enregistrements pour voir les indicateurs apparaître ici.
+        </p>
+        <div class="flex flex-wrap gap-3 pt-4">
+            <button type="button" class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 font-semibold text-slate-900 hover:-translate-y-[1px] transition">
+                Nouvelle facture
+            </button>
+            <button type="button" class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-4 py-2.5 font-semibold text-slate-100 hover:border-emerald-400 transition">
+                Nouveau client
+            </button>
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
+        <div class="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Activité</p>
+                    <h3 class="text-lg font-semibold text-slate-50">Rien pour l'instant</h3>
+                    <p class="text-sm text-slate-400">Ajoutez une facture ou un client pour voir le flux ici.</p>
+                </div>
+            </div>
+            <div class="rounded-xl border border-dashed border-slate-700 p-6 text-sm text-slate-300">
+                Aucune activité enregistrée.
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-xl">
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">Indicateurs</p>
+                <div class="rounded-xl border border-dashed border-slate-700 p-4 text-sm text-slate-300">
+                    Les KPIs s'afficheront dès que vous aurez des données.
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-xl">
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">Actions rapides</p>
+                <div class="space-y-3 text-sm text-slate-200">
+                    <button class="w-full rounded-lg border border-slate-700 px-3 py-2 text-left hover:border-emerald-400 transition">Créer une facture</button>
+                    <button class="w-full rounded-lg border border-slate-700 px-3 py-2 text-left hover:border-emerald-400 transition">Ajouter un client</button>
+                    <button class="w-full rounded-lg border border-slate-700 px-3 py-2 text-left hover:border-emerald-400 transition">Planifier une relance</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
