@@ -311,31 +311,18 @@ def facture_pdf(request, pk):
 
     facture = get_object_or_404(Facture.objects.select_related('client'), pk=pk)
     facture = compute_invoice_totals(facture)
-    lignes   = facture.lignes.filter(item_type='NORMAL')
-    debours  = facture.lignes.filter(item_type='DEBOURS')
-
-    company = {
-        "name": "MCCG",
-        "address": "123 Avenue Mohammed VI, Casablanca, Maroc",
-        "phone": "+212 6 12 34 56 78",
-        "email": "contact@mccg.ma",
-        "ice": "001234567000089",
-        "rc": "RC 567890",
-        "iban": "MA64 1234 5678 9012 3456 7890",
-        "bank": "Banque Populaire",
-    }
+    lignes  = facture.lignes.filter(item_type='NORMAL')
+    debours = facture.lignes.filter(item_type='DEBOURS')
 
     context = {
         "facture": facture,
         "client": facture.client,
         "lignes": lignes,
         "debours": debours,
-        "company": company,
         "today": timezone.now().date(),
     }
 
     html = render_to_string("invoices/invoice_pdf.html", context)
-
     result = BytesIO()
     pdf = pisa.CreatePDF(src=html, dest=result, encoding="utf-8")
     if pdf.err:
