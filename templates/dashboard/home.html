@@ -20,12 +20,12 @@
 {% block content %}
 <div class="space-y-8">
 
-    <!-- En-tÃªte -->
+    <!-- En-tête -->
     <div class="rounded-3xl bg-white border border-slate-200 shadow-xl p-6 sm:p-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="text-xs font-semibold uppercase tracking-[0.22em] text-brand-600">Bonjour {{ user.get_full_name|default:user.username }}</p>
-            <h1 class="text-2xl md:text-3xl font-semibold text-ink mt-1">Vue dâ€™ensemble CRM</h1>
-            <p class="text-sm text-slate-600 mt-1.5">Suivez vos encaissements, relances et activitÃ©s clÃ©s.</p>
+            <h1 class="text-2xl md:text-3xl font-semibold text-ink mt-1">Vue d’ensemble CRM</h1>
+            <p class="text-sm text-slate-600 mt-1.5">Suivez vos encaissements, relances et activités clés.</p>
         </div>
         <div class="flex flex-wrap gap-3">
             <a href="{% url 'dashboard:facture_create' %}" class="inline-flex min-w-[170px] justify-center items-center gap-2 rounded-xl bg-brand-600 text-white px-4 py-3 font-semibold shadow-md shadow-brand-200/70 hover:-translate-y-[1px] transition">
@@ -48,17 +48,17 @@
         <div class="kpi-card">
             <p class="kpi-label">Encours facturation</p>
             <p class="kpi-value text-money">{{ encours|floatformat:2 }}&thinsp;DH</p>
-            <p class="kpi-secondary">Factures envoyÃ©es ou en retard</p>
+            <p class="kpi-secondary">Factures envoyées ou en retard</p>
         </div>
         <div class="kpi-card kpi--danger">
             <p class="kpi-label">Relances urgentes</p>
             <p class="kpi-value">{{ retard_count }}</p>
-            <p class="kpi-secondary">Ã€ traiter dÃ¨s que possible</p>
+            <p class="kpi-secondary">À traiter dès que possible</p>
         </div>
         <div class="kpi-card kpi--success">
             <p class="kpi-label">Clients actifs</p>
             <p class="kpi-value">{{ total_clients }}</p>
-            <p class="kpi-secondary">Fiches client Ã  jour</p>
+            <p class="kpi-secondary">Fiches client à jour</p>
         </div>
         <div class="kpi-card kpi--purple">
             <p class="kpi-label">Prospects en cours</p>
@@ -70,22 +70,22 @@
     <!-- Grille principale -->
     <div class="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-5">
 
-        <!-- DerniÃ¨res factures -->
+        <!-- Dernières factures -->
         <div class="card overflow-hidden">
             <div class="card-header">
-                <p class="card-title">DerniÃ¨res factures</p>
+                <p class="card-title">Dernières factures</p>
                 <a href="{% url 'dashboard:facture_list' %}" class="btn btn--ghost btn--sm">Voir tout</a>
             </div>
             <div class="overflow-x-auto">
                 <table class="crm-table">
                     <thead>
                         <tr>
-                            <th>NumÃ©ro</th>
+                            <th>Numéro</th>
                             <th>Client</th>
                             <th>Objet</th>
                             <th>Montant HT</th>
                             <th>Statut</th>
-                            <th>Ã‰chÃ©ance</th>
+                            <th>Échéance</th>
                             <th class="text-right">PDF</th>
                         </tr>
                     </thead>
@@ -97,15 +97,15 @@
                             <td class="text-slate-500 max-w-[180px] truncate">{{ f.objet }}</td>
                             <td class="text-money">{{ f.montant_ht|floatformat:2 }}&thinsp;DH</td>
                             <td>
-                                {% if f.statut == 'PAYEE' %}<span class="badge badge--success">PayÃ©e</span>
-                                {% elif f.statut == 'ENVOYEE' %}<span class="badge badge--info">EnvoyÃ©e</span>
+                                {% if f.statut == 'PAYEE' %}<span class="badge badge--success">Payée</span>
+                                {% elif f.statut == 'ENVOYEE' %}<span class="badge badge--info">Envoyée</span>
                                 {% elif f.statut == 'EN_RETARD' %}<span class="badge badge--danger">En retard</span>
                                 {% elif f.statut == 'BROUILLON' %}<span class="badge badge--neutral">Brouillon</span>
                                 {% else %}<span class="badge badge--neutral">{{ f.get_statut_display }}</span>{% endif %}
                             </td>
-                            <td class="text-slate-400 text-xs">{% if f.date_echeance %}{{ f.date_echeance|date:"d/m/Y" }}{% else %}â€”{% endif %}</td>
+                            <td class="text-slate-400 text-xs">{% if f.date_echeance %}{{ f.date_echeance|date:"d/m/Y" }}{% else %}—{% endif %}</td>
                             <td class="text-right">
-                                <a href="{% url 'dashboard:facture_pdf' f.pk %}" class="btn btn--ghost btn--xs" target="_blank" rel="noopener">TÃ©lÃ©charger</a>
+                                <a href="{% url 'dashboard:facture_pdf' f.pk %}" class="btn btn--ghost btn--xs" target="_blank" rel="noopener">Télécharger</a>
                             </td>
                         </tr>
                         {% empty %}
@@ -113,8 +113,8 @@
                             <td colspan="7">
                                 <div class="empty-state">
                                     <p class="empty-state-title">Aucune facture</p>
-                                    <p class="empty-state-desc">CrÃ©ez votre premiÃ¨re facture pour dÃ©marrer.</p>
-                                    <a href="{% url 'dashboard:facture_create' %}" class="btn btn--primary btn--sm mt-3">CrÃ©er une facture</a>
+                                    <p class="empty-state-desc">Créez votre première facture pour démarrer.</p>
+                                    <a href="{% url 'dashboard:facture_create' %}" class="btn btn--primary btn--sm mt-3">Créer une facture</a>
                                 </div>
                             </td>
                         </tr>
@@ -124,7 +124,7 @@
             </div>
         </div>
 
-        <!-- Colonne latÃ©rale -->
+        <!-- Colonne latérale -->
         <div class="space-y-5">
 
             <div class="card overflow-hidden">
@@ -154,11 +154,11 @@
                 </div>
             </div>
 
-            <!-- RÃ©partition des factures -->
+            <!-- Répartition des factures -->
             <div class="card card-body">
                 <div class="flex items-center justify-between mb-4">
-                    <p class="card-title">RÃ©partition des factures</p>
-                    <span class="text-xs text-slate-500">PayÃ©es / ImpayÃ©es / En retard</span>
+                    <p class="card-title">Répartition des factures</p>
+                    <span class="text-xs text-slate-500">Payées / Impayées / En retard</span>
                 </div>
                 <div class="flex items-center gap-4">
                     {% with total=factures_total|default:0 %}
@@ -184,7 +184,7 @@
                         <div class="relative h-32 w-32">
                             <div class="h-32 w-32 rounded-full bg-slate-100 border border-slate-200"></div>
                             <div class="absolute inset-0 flex items-center justify-center">
-                                <p class="text-xs text-slate-500 text-center px-2">Aucune donnÃ©e</p>
+                                <p class="text-xs text-slate-500 text-center px-2">Aucune donnée</p>
                             </div>
                         </div>
                         {% endif %}
@@ -193,11 +193,11 @@
                     <div class="space-y-2 text-sm text-slate-700">
                         <div class="flex items-center gap-2">
                             <span class="inline-block h-3 w-3 rounded-full bg-emerald-500"></span>
-                            PayÃ©es ({{ factures_payees }})
+                            Payées ({{ factures_payees }})
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="inline-block h-3 w-3 rounded-full bg-amber-400"></span>
-                            ImpayÃ©es ({{ factures_impayees }})
+                            Impayées ({{ factures_impayees }})
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="inline-block h-3 w-3 rounded-full bg-rose-500"></span>
@@ -210,17 +210,17 @@
             <div class="card card-body">
                 <p class="text-xs font-bold uppercase tracking-[0.07em] text-slate-400 mb-3">Actions rapides</p>
                 <div class="space-y-2">
-                    <a href="{% url 'dashboard:facture_create' %}" class="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 hover:border-brand-300 hover:bg-brand-50/50 hover:text-brand-800 transition">CrÃ©er une facture</a>
+                    <a href="{% url 'dashboard:facture_create' %}" class="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 hover:border-brand-300 hover:bg-brand-50/50 hover:text-brand-800 transition">Créer une facture</a>
                     <a href="{% url 'dashboard:client_create' %}" class="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 hover:border-brand-300 hover:bg-brand-50/50 hover:text-brand-800 transition">Ajouter un client</a>
                     <a href="{% url 'dashboard:prospect_create' %}" class="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 hover:border-brand-300 hover:bg-brand-50/50 hover:text-brand-800 transition">Ajouter un prospect</a>
-                    <a href="{% url 'dashboard:prospect_list' %}?statut=EN_NEGOCIATION" class="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 hover:border-brand-300 hover:bg-brand-50/50 hover:text-brand-800 transition">Prospects en nÃ©gociation</a>
+                    <a href="{% url 'dashboard:prospect_list' %}?statut=EN_NEGOCIATION" class="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 hover:border-brand-300 hover:bg-brand-50/50 hover:text-brand-800 transition">Prospects en négociation</a>
                 </div>
             </div>
 
             <div class="rounded-2xl bg-gradient-to-br from-brand-50 via-white to-emerald-50 border border-brand-100 shadow-md p-5">
                 <p class="text-xs uppercase tracking-[0.22em] text-brand-700 mb-1">Conseil</p>
-                <p class="text-ink font-semibold">Connectez votre Ã©quipe</p>
-                <p class="text-sm text-slate-600 mt-1">Invitez les collaborateurs pour partager les relances et garder la visibilitÃ©.</p>
+                <p class="text-ink font-semibold">Connectez votre équipe</p>
+                <p class="text-sm text-slate-600 mt-1">Invitez les collaborateurs pour partager les relances et garder la visibilité.</p>
             </div>
 
         </div>

@@ -90,8 +90,12 @@ if os.getenv("DB_NAME"):
             "PASSWORD": os.getenv("DB_PASSWORD"),
             "HOST": os.getenv("DB_HOST", "localhost"),
             "PORT": os.getenv("DB_PORT", "3306"),
-            # Enforce strict mode to avoid silent data truncation/rounding
-            "OPTIONS": {"sql_mode": "STRICT_TRANS_TABLES"},
+            # Enforce strict mode and UTF-8 everywhere
+            "OPTIONS": {
+                "sql_mode": "STRICT_TRANS_TABLES",
+                "charset": "utf8mb4",
+                "init_command": "SET NAMES 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'",
+            },
         }
     }
 else:
