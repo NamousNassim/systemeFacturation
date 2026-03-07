@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView
@@ -34,14 +34,33 @@ def home(request):
         statut=FactureStatut.EN_RETARD
     )[:5]
 
-    return render(request, 'dashboard/home.html', {
+    # Statuts pour le graphique
+    payees     = Facture.objects.filter(statut=FactureStatut.PAYEE).count()
+    retard     = retard_count
+    impayees   = Facture.objects.filter(statut__in=[
+        FactureStatut.ENVOYEE, FactureStatut.BROUILLON
+    ]).count()
+    total_fact = payees + retard + impayees
+    def pct(part, total):
+        return round((part / total) * 100) if total else 0
+
+    context = {
         'total_clients':      total_clients,
         'total_prospects':    total_prospects,
         'encours':            encours,
         'retard_count':       retard_count,
         'dernieres_factures': dernieres_factures,
         'factures_en_retard': factures_en_retard,
-    })
+        'factures_payees':    payees,
+        'factures_impayees':  impayees,
+        'factures_retard':    retard,
+        'factures_total':     total_fact,
+        'factures_pct_payees':   pct(payees, total_fact),
+        'factures_pct_impayees': pct(impayees, total_fact),
+        'factures_pct_retard':   pct(retard, total_fact),
+    }
+
+    return render(request, 'dashboard/home.html', context)
 
 
 # ── CLIENTS ─────────────────────────────────────────────────────────────────────
@@ -278,4 +297,3 @@ def facture_update(request, pk):
         'submit_label': 'Enregistrer les modifications',
         'facture': facture,
     })
-
