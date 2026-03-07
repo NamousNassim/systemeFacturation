@@ -1,3 +1,4 @@
+from decimal import Decimal, ROUND_HALF_UP
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -110,12 +111,11 @@ class Facture(models.Model):
         Client, on_delete=models.PROTECT, related_name='factures', verbose_name='Client'
     )
     objet          = models.CharField(max_length=300, verbose_name='Objet')
-    montant_ht     = models.DecimalField(
-        max_digits=12, decimal_places=2, default=0, verbose_name='Montant HT'
-    )
-    taux_tva       = models.DecimalField(
-        max_digits=5, decimal_places=2, default=20, verbose_name='Taux TVA (%)'
-    )
+    montant_ht     = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'), verbose_name='Montant HT')
+    subtotal_ht    = models.DecimalField(max_digits=14, decimal_places=2, default=Decimal('0.00'), verbose_name='Sous-total HT')
+    tva_rate       = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('20.00'), verbose_name='Taux TVA (%)')
+    tva_amount     = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'), verbose_name='Montant TVA')
+    total_ttc      = models.DecimalField(max_digits=14, decimal_places=2, default=Decimal('0.00'), verbose_name='Total TTC')
     statut         = models.CharField(
         max_length=20, choices=FactureStatut.choices, default=FactureStatut.BROUILLON,
         verbose_name='Statut'
@@ -151,9 +151,21 @@ class Facture(models.Model):
             self.numero = f"FAC-{year}-{seq:04d}"
         super().save(*args, **kwargs)
 
-    @property
-    def montant_ttc(self):
-        return round(float(self.montant_ht) * (1 + float(self.taux_tva) / 100), 2)
+    def _quantize(self, value: Decimal) -> Decimal:
+        return value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    def recompute_totals(self, save: bool = False):
+        lines = list(self.lignes.all())
+        subtotal = sum((l.total_ht for l in lines), Decimal('0.00'))
+        tva = self._quantize(subtotal * (self.tva_rate / Decimal('100')))
+        total = self._quantize(subtotal + tva)
+        self.subtotal_ht = self._quantize(subtotal)
+        self.montant_ht = self.subtotal_ht  # backward compat
+        self.tva_amount = tva
+        self.total_ttc = total
+        if save:
+            super().save(update_fields=['subtotal_ht', 'montant_ht', 'tva_amount', 'total_ttc', 'updated_at'])
+        return self.subtotal_ht, self.tva_amount, self.total_ttc
 
     def __str__(self):
         return f"{self.numero} — {self.client}"
@@ -167,8 +179,12 @@ class LigneFacture(models.Model):
     quantite      = models.DecimalField(
         max_digits=10, decimal_places=2, default=1, verbose_name='Quantité'
     )
-    prix_unitaire = models.DecimalField(
-        max_digits=12, decimal_places=2, default=0, verbose_name='Prix unitaire HT'
+    prix_unitaire = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'), verbose_name='Prix unitaire HT')
+    item_type     = models.CharField(
+        max_length=20,
+        choices=(('NORMAL', 'Ligne'), ('DEBOURS', 'Débours')),
+        default='NORMAL',
+        verbose_name='Type de ligne'
     )
 
     class Meta:
@@ -176,8 +192,8 @@ class LigneFacture(models.Model):
         verbose_name_plural = 'Lignes de facture'
 
     @property
-    def montant(self):
-        return round(float(self.quantite) * float(self.prix_unitaire), 2)
+    def total_ht(self):
+        return (self.quantite * self.prix_unitaire).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     def __str__(self):
         return f"{self.description} ×{self.quantite}"

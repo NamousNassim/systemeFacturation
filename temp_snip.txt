@@ -1,0 +1,55 @@
+        'action': f'Modifier — {facture.numero}',
+        'submit_label': 'Enregistrer les modifications',
+        'facture': facture,
+    })
+
+
+# PDF facture
+@login_required
+def facture_pdf(request, pk):
+    try:
+        from weasyprint import HTML, CSS  # import paresseux pour éviter l'erreur si libs manquent
+    except Exception as e:
+        return HttpResponse(
+            f"WeasyPrint n'est pas installé correctement: {e}",
+            status=500,
+            content_type="text/plain",
+        )
+
+    facture = get_object_or_404(Facture.objects.select_related('client'), pk=pk)
+    facture = compute_invoice_totals(facture)
+    lignes   = facture.lignes.filter(item_type='NORMAL')
+    debours  = facture.lignes.filter(item_type='DEBOURS')
+
+    company = {
+        "name": "MCCG",
+        "address": "123 Avenue Mohammed VI, Casablanca, Maroc",
+        "phone": "+212 6 12 34 56 78",
+        "email": "contact@mccg.ma",
+        "ice": "001234567000089",
+        "rc": "RC 567890",
+        "iban": "MA64 1234 5678 9012 3456 7890",
+        "bank": "Banque Populaire",
+    }
+
+    context = {
+        "facture": facture,
+        "client": facture.client,
+        "lignes": lignes,
+        "debours": debours,
+        "company": company,
+        "today": timezone.now().date(),
+    }
+
+    html_string = render_to_string("invoices/invoice_pdf.html", context)
+    css_path = finders.find("css/invoice_pdf.css")
+    base_url = request.build_absolute_uri("/")
+
+    pdf = HTML(string=html_string, base_url=base_url).write_pdf(
+        stylesheets=[CSS(filename=css_path)] if css_path else None
+    )
+
+    response = HttpResponse(pdf, content_type="application/pdf")
+    filename = f"facture-{facture.numero}.pdf"
+    response["Content-Disposition"] = f'inline; filename="{filename}"'
+    return response

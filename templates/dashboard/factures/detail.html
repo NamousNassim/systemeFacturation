@@ -19,6 +19,15 @@
         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
     Modifier
 </a>
+<a href="{% url 'dashboard:facture_pdf' facture.pk %}" class="btn btn--secondary btn--sm" target="_blank" rel="noopener">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M6 2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
+        <path d="M14 2v6h6"/>
+        <path d="M8 14h8"/>
+        <path d="M8 18h5"/>
+    </svg>
+    Télécharger PDF
+</a>
 {% endblock %}
 
 {% block content %}
@@ -98,18 +107,16 @@
                 <div class="w-72 space-y-2 text-sm">
                     <div class="flex justify-between text-slate-600">
                         <span>Montant HT</span>
-                        <span class="text-money">{{ facture.montant_ht|floatformat:2 }}&thinsp;DH</span>
+                        <span class="text-money">{{ facture.subtotal_ht|default:facture.montant_ht|floatformat:2 }}&thinsp;DH</span>
                     </div>
                     <div class="flex justify-between text-slate-600">
-                        <span>TVA ({{ facture.taux_tva }}%)</span>
-                        <span class="text-money">
-                            {% widthratio facture.montant_ht 100 facture.taux_tva %}&thinsp;DH
-                        </span>
+                        <span>TVA ({{ facture.tva_rate|floatformat:2 }}%)</span>
+                        <span class="text-money">{{ facture.tva_amount|floatformat:2 }}&thinsp;DH</span>
                     </div>
                     <div class="flex justify-between font-bold text-slate-900 text-base
                                 border-t border-slate-200 pt-2">
                         <span>Total TTC</span>
-                        <span class="text-money">{{ facture.montant_ttc|floatformat:2 }}&thinsp;DH</span>
+                        <span class="text-money">{{ facture.total_ttc|floatformat:2 }}&thinsp;DH</span>
                     </div>
                 </div>
             </div>
@@ -144,18 +151,18 @@
                 <div>
                     <dt class="text-xs text-slate-400">Montant HT</dt>
                     <dd class="text-base font-bold text-slate-800 text-money">
-                        {{ facture.montant_ht|floatformat:2 }}&thinsp;DH
+                        {{ facture.subtotal_ht|default:facture.montant_ht|floatformat:2 }}&thinsp;DH
                     </dd>
                 </div>
                 <div>
                     <dt class="text-xs text-slate-400">Montant TTC</dt>
                     <dd class="text-base font-bold text-blue-700 text-money">
-                        {{ facture.montant_ttc|floatformat:2 }}&thinsp;DH
+                        {{ facture.total_ttc|floatformat:2 }}&thinsp;DH
                     </dd>
                 </div>
                 <div>
                     <dt class="text-xs text-slate-400">TVA</dt>
-                    <dd class="text-sm font-medium text-slate-700">{{ facture.taux_tva }}%</dd>
+                    <dd class="text-sm font-medium text-slate-700">{{ facture.tva_rate|floatformat:2 }}%</dd>
                 </div>
                 <div>
                     <dt class="text-xs text-slate-400">Créée le</dt>

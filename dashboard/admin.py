@@ -28,15 +28,15 @@ class ProspectAdmin(admin.ModelAdmin):
 class LigneFactureInline(admin.TabularInline):
     model  = LigneFacture
     extra  = 1
-    fields = ['description', 'quantite', 'prix_unitaire']
+    fields = ['description', 'quantite', 'prix_unitaire', 'item_type']
 
 
 @admin.register(Facture)
 class FactureAdmin(admin.ModelAdmin):
-    list_display    = ['numero', 'client', 'objet', 'montant_ht', 'taux_tva',
+    list_display    = ['numero', 'client', 'objet', 'subtotal_ht', 'tva_amount', 'total_ttc',
                        'statut', 'date_emission', 'date_echeance']
     list_filter     = ['statut', 'date_emission']
     search_fields   = ['numero', 'objet', 'client__nom', 'client__societe']
-    readonly_fields = ['numero', 'created_at', 'updated_at']
+    readonly_fields = ['numero', 'created_at', 'updated_at', 'subtotal_ht', 'tva_amount', 'total_ttc']
     inlines         = [LigneFactureInline]
 

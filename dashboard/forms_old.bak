@@ -3,18 +3,18 @@ from .models import Client, Prospect, Facture, LigneFacture
 
 
 class StyledFormMixin:
-    """Ajoute les classes CSS du design system aux widgets."""
+    """Add design-system CSS classes to all form widgets automatically."""
 
     WIDGET_CLASSES = {
-        forms.TextInput: 'form-input',
-        forms.EmailInput: 'form-input',
-        forms.NumberInput: 'form-input',
-        forms.URLInput: 'form-input',
-        forms.PasswordInput: 'form-input',
-        forms.DateInput: 'form-input',
-        forms.DateTimeInput: 'form-input',
-        forms.Textarea: 'form-textarea',
-        forms.Select: 'form-select',
+        forms.TextInput:      'form-input',
+        forms.EmailInput:     'form-input',
+        forms.NumberInput:    'form-input',
+        forms.URLInput:       'form-input',
+        forms.PasswordInput:  'form-input',
+        forms.DateInput:      'form-input',
+        forms.DateTimeInput:  'form-input',
+        forms.Textarea:       'form-textarea',
+        forms.Select:         'form-select',
         forms.SelectMultiple: 'form-select',
     }
 
@@ -35,7 +35,7 @@ class ClientForm(StyledFormMixin, forms.ModelForm):
         ]
         widgets = {
             'adresse': forms.Textarea(attrs={'rows': 2}),
-            'notes': forms.Textarea(attrs={'rows': 3}),
+            'notes':   forms.Textarea(attrs={'rows': 3}),
         }
         labels = {
             'nom': 'Nom',
@@ -82,19 +82,19 @@ class FactureForm(StyledFormMixin, forms.ModelForm):
             'statut', 'date_emission', 'date_echeance', 'notes',
         ]
         widgets = {
-            'notes': forms.Textarea(attrs={'rows': 2}),
-            'date_emission': forms.DateInput(attrs={'type': 'date'}),
-            'date_echeance': forms.DateInput(attrs={'type': 'date'}),
+            'notes':          forms.Textarea(attrs={'rows': 2}),
+            'date_emission':  forms.DateInput(attrs={'type': 'date'}),
+            'date_echeance':  forms.DateInput(attrs={'type': 'date'}),
         }
         labels = {
-            'client': 'Client',
-            'objet': 'Objet / LibellÃ©',
-            'montant_ht': 'Montant HT (DH)',
-            'tva_rate': 'Taux TVA (%)',
-            'statut': 'Statut',
-            'date_emission': "Date d'Ã©mission",
-            'date_echeance': "Date d'Ã©chÃ©ance",
-            'notes': 'Notes',
+            'client':         'Client',
+            'objet':          'Objet / Libellé',
+            'montant_ht':     'Montant HT (DH)',
+            'tva_rate':       'Taux TVA (%)',
+            'statut':         'Statut',
+            'date_emission':  "Date d'émission",
+            'date_echeance':  "Date d'échéance",
+            'notes':          'Notes',
         }
 
 
@@ -103,10 +103,9 @@ class LigneFactureForm(StyledFormMixin, forms.ModelForm):
         model = LigneFacture
         fields = ['description', 'quantite', 'prix_unitaire', 'item_type']
         labels = {
-            'description': 'Description',
-            'quantite': 'QtÃ©',
-            'prix_unitaire': 'P.U. HT (DH)',
-            'item_type': 'Type de ligne',
+            'description':   'Description',
+            'quantite':      'Qté',
+            'prix_unitaire': 'P.U. HT (DH)',\n            'item_type': 'Type de ligne',
         }
 
 

@@ -1,0 +1,245 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Facture {{ facture.numero }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 18mm 16mm 20mm 16mm;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10.5pt;
+            color: #000;
+        }
+
+        /* Header */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12mm;
+        }
+        .header-table td { vertical-align: top; padding: 0; }
+        .col-brand { width: 55%; }
+        .col-meta  { width: 45%; text-align: right; }
+
+        .brand-name {
+            font-size: 20pt;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .brand-meta {
+            font-size: 9.5pt;
+            line-height: 1.5;
+        }
+        .doc-title {
+            font-size: 20pt;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .meta-table {
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-left: auto;
+        }
+        .meta-table td { padding: 2px 4px; }
+        .meta-table .lbl {
+            text-align: right;
+            padding-right: 6px;
+            white-space: nowrap;
+        }
+
+        /* Client box */
+        .client-box {
+            border: 1px solid #000;
+            padding: 10px 12px;
+            margin-bottom: 10mm;
+        }
+        .client-lbl  { font-weight: 700; margin-bottom: 4px; }
+        .client-name { font-weight: 700; margin-bottom: 2px; }
+        .client-info { font-size: 10pt; line-height: 1.5; }
+
+        /* Lines table */
+        .lines-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10.5pt;
+            margin-bottom: 6mm;
+        }
+        .lines-table th,
+        .lines-table td {
+            border: 1px solid #000;
+            padding: 7px 8px;
+            vertical-align: top;
+        }
+        .lines-table th {
+            font-weight: 700;
+            text-align: left;
+        }
+        .lines-table th.num,
+        .lines-table td.num {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .debours-row td {
+            font-weight: 700;
+            background: #f0f0f0;
+        }
+
+        /* Totals */
+        .totals-outer {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10mm;
+        }
+        .totals-outer td { padding: 0; }
+        .col-spacer { width: 55%; }
+        .col-box    { width: 45%; }
+
+        .totals-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10.5pt;
+        }
+        .totals-table td {
+            border: 1px solid #000;
+            padding: 7px 10px;
+        }
+        .t-value {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .grand td { font-weight: 700; }
+
+        /* Conditions */
+        .conditions {
+            font-size: 10pt;
+            line-height: 1.5;
+            margin-bottom: 16mm;
+        }
+
+        /* Footer */
+        .footer-line {
+            border: none;
+            border-top: 1px solid #000;
+            margin-bottom: 6mm;
+        }
+        .footer {
+            text-align: center;
+            font-size: 9.5pt;
+            line-height: 1.6;
+        }
+        .footer p { margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+
+    <table class="header-table">
+        <tr>
+            <td class="col-brand">
+                <div class="brand-name">MCCG</div>
+                <div class="brand-meta">
+                    92 bd Zerktouni Appartement 6 &#233;tage 2<br>
+                    Appartement 12 &#233;tage 3 Gu&#233;liz 40000 Marrakech
+                </div>
+            </td>
+            <td class="col-meta">
+                <div class="doc-title">FACTURE</div>
+                <table class="meta-table">
+                    <tr>
+                        <td class="lbl">N&#176;</td>
+                        <td>{{ facture.numero }}</td>
+                    </tr>
+                    <tr>
+                        <td class="lbl">Date</td>
+                        <td>{{ facture.date_emission|date:"d/m/Y" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="lbl">&#201;ch&#233;ance</td>
+                        <td>{{ facture.date_echeance|date:"d/m/Y" }}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <div class="client-box">
+        <div class="client-lbl">Factur&#233; &#224; :</div>
+        <div class="client-name">{{ client.societe|default:client }}</div>
+        {% if client.adresse %}<div class="client-info">{{ client.adresse }}</div>{% endif %}
+        {% if client.ice %}<div class="client-info">ICE: {{ client.ice }}</div>{% endif %}
+    </div>
+
+    <table class="lines-table">
+        <thead>
+            <tr>
+                <th style="width:50%;">Description</th>
+                <th class="num" style="width:18%;">Prix unitaire</th>
+                <th class="num" style="width:12%;">Quantit&#233;</th>
+                <th class="num" style="width:20%;">Total HT</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for l in lignes %}
+            <tr>
+                <td>{{ l.description }}</td>
+                <td class="num">{{ l.prix_unitaire|floatformat:2 }} DH</td>
+                <td class="num">{{ l.quantite|floatformat:2 }}</td>
+                <td class="num">{{ l.total_ht|floatformat:2 }} DH</td>
+            </tr>
+            {% endfor %}
+            {% if debours %}
+            <tr class="debours-row">
+                <td colspan="4">D&#233;bours</td>
+            </tr>
+            {% for l in debours %}
+            <tr>
+                <td>{{ l.description }}</td>
+                <td class="num">{{ l.prix_unitaire|floatformat:2 }} DH</td>
+                <td class="num">{{ l.quantite|floatformat:2 }}</td>
+                <td class="num">{{ l.total_ht|floatformat:2 }} DH</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+
+    <table class="totals-outer">
+        <tr>
+            <td class="col-spacer"></td>
+            <td class="col-box">
+                <table class="totals-table">
+                    <tr>
+                        <td>Total HT</td>
+                        <td class="t-value">{{ facture.subtotal_ht|floatformat:2 }} DH</td>
+                    </tr>
+                    <tr>
+                        <td>TVA ({{ facture.tva_rate|floatformat:0 }} %)</td>
+                        <td class="t-value">{{ facture.tva_amount|floatformat:2 }} DH</td>
+                    </tr>
+                    <tr class="grand">
+                        <td>Total TTC</td>
+                        <td class="t-value">{{ facture.total_ttc|floatformat:2 }} DH</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <div class="conditions">
+        <strong>Conditions de paiement:</strong> Paiement &#224; r&#233;ception de la facture.<br>
+        En application de la loi 32-10 compl&#233;tant la loi 15-95 (BO du 06/10/2011), la date de r&#232;glement de la pr&#233;sente ne peut
+        exc&#233;der 2 mois apr&#232;s la date de la facture, sous peine d&#8217;une majoration minimale du taux directeur de BANK AL Maghrib.
+    </div>
+
+    <hr class="footer-line">
+    <div class="footer">
+        <p>Merci pour votre confiance et votre fid&#233;lit&#233;.</p>
+        <p>MCCG SARL AU - RC N&#176; 54699 - CNSS N&#176; 9318975 - PATENTE N&#176; 45193156 - IF N&#176; 6527421 - ICE 00153493000091</p>
+        <p>Banque: BMCE - RIB 01145000032210000289276</p>
+    </div>
+
+</body>
+</html>
