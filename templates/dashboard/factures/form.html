@@ -92,32 +92,32 @@
                 </div>
                 <span class="text-xs px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">Automatique</span>
             </div>
-            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4" id="recurrence-block">
                 <div>
                     <label class="form-label">{{ form.type_facture.label }}</label>
                     {{ form.type_facture }}
                     <p class="form-hint">Ponctuelle ou modèle récurrent</p>
                     {% if form.type_facture.errors %}<p class="form-error">{{ form.type_facture.errors|striptags }}</p>{% endif %}
                 </div>
-                <div>
+                <div class="recurrence-field">
                     <label class="form-label">{{ form.recurrence_frequence.label }}</label>
                     {{ form.recurrence_frequence }}
                     <p class="form-hint">Mensuelle, trimestrielle ou annuelle</p>
                     {% if form.recurrence_frequence.errors %}<p class="form-error">{{ form.recurrence_frequence.errors|striptags }}</p>{% endif %}
                 </div>
-                <div>
+                <div class="recurrence-field">
                     <label class="form-label">{{ form.recurrence_debut.label }}</label>
                     {{ form.recurrence_debut }}
                     <p class="form-hint">Date à partir de laquelle on génère</p>
                     {% if form.recurrence_debut.errors %}<p class="form-error">{{ form.recurrence_debut.errors|striptags }}</p>{% endif %}
                 </div>
-                <div>
+                <div class="recurrence-field">
                     <label class="form-label">{{ form.recurrence_fin.label }}</label>
                     {{ form.recurrence_fin }}
                     <p class="form-hint">Arrêt automatique (optionnel)</p>
                     {% if form.recurrence_fin.errors %}<p class="form-error">{{ form.recurrence_fin.errors|striptags }}</p>{% endif %}
                 </div>
-                <div>
+                <div class="recurrence-field">
                     <label class="form-label">{{ form.recurrence_prochaine.label }}</label>
                     <div class="bg-slate-50 text-slate-700 rounded-xl px-3 py-2 border border-slate-200">
                         {{ form.recurrence_prochaine }}
@@ -125,18 +125,10 @@
                     <p class="text-xs text-emerald-700 mt-1">Calculée automatiquement selon la fréquence et la date de début.</p>
                     {% if form.recurrence_prochaine.errors %}<p class="form-error">{{ form.recurrence_prochaine.errors|striptags }}</p>{% endif %}
                 </div>
-                <div class="flex items-center gap-2 pt-6">
+                <div class="recurrence-field flex items-center gap-2 pt-6">
                     {{ form.recurrence_active }}
                     <label class="form-label mb-0">{{ form.recurrence_active.label }}</label>
                     {% if form.recurrence_active.errors %}<p class="form-error">{{ form.recurrence_active.errors|striptags }}</p>{% endif %}
-                </div>
-                <div class="sm:col-span-2">
-                    <label class="form-label">{{ form.source_recurring.label }}</label>
-                    <div class="bg-slate-50 text-slate-600 rounded-xl px-3 py-2 border border-slate-200">
-                        {{ form.source_recurring }}
-                    </div>
-                    <p class="form-hint">Renseignée automatiquement pour les factures générées.</p>
-                    {% if form.source_recurring.errors %}<p class="form-error">{{ form.source_recurring.errors|striptags }}</p>{% endif %}
                 </div>
             </div>
         </div>
@@ -292,6 +284,12 @@
     const tvaInput = document.querySelector('[name$="tva_rate"]');
     const ttcEl    = document.getElementById('ttc-display');
     const ttcSummary = document.getElementById('ttc-display-summary');
+    const nextGenPill = document.getElementById('next-gen-pill');
+    const typeSelect = document.querySelector('[name$="type_facture"]');
+    const recFields = document.querySelectorAll('.recurrence-field');
+    const recFreq   = document.querySelector('[name$="recurrence_frequence"]');
+    const recStart  = document.querySelector('[name$="recurrence_debut"]');
+    const recNext   = document.querySelector('[name$="recurrence_prochaine"]');
 
     function updateTTC() {
         const ht  = parseFloat(htInput && htInput.value)  || 0;
@@ -323,6 +321,10 @@
         const subFooter = document.getElementById('lines-subtotal-footer');
         if (sub) sub.textContent = formatted;
         if (subFooter) subFooter.textContent = formatted;
+        if (htInput) {
+            htInput.value = total ? total.toFixed(2) : '';
+            updateTTC();
+        }
     }
 
     document.addEventListener('input', function (e) {
@@ -371,6 +373,55 @@
         });
         cb.parentNode.appendChild(btn);
     });
+
+    function toggleRecurrenceFields() {
+        const recurring = typeSelect && typeSelect.value === 'RECURRENTE';
+        recFields.forEach(function (el) {
+            el.style.display = recurring ? '' : 'none';
+            el.querySelectorAll('input, select, textarea').forEach(function (inp) {
+                // keep the computed fields untouched but prevent post when not recurring
+                if (!recurring) {
+                    inp.disabled = true;
+                } else {
+                    inp.disabled = false;
+                }
+            });
+        });
+        if (!recurring) {
+            if (recNext) recNext.value = '';
+            if (nextGenPill) nextGenPill.textContent = '—';
+        } else {
+            computeNextGeneration();
+        }
+    }
+
+    function computeNextGeneration() {
+        if (!recStart || !recFreq || !recNext) return;
+        const startVal = recStart.value;
+        const freqVal  = recFreq.value;
+        if (!startVal || !freqVal) {
+            recNext.value = '';
+            if (nextGenPill) nextGenPill.textContent = '—';
+            return;
+        }
+        const base = new Date(startVal);
+        if (Number.isNaN(base.getTime())) return;
+        const next = new Date(base);
+        if (freqVal === 'MENSUELLE') next.setMonth(next.getMonth() + 1);
+        if (freqVal === 'TRIMESTRIELLE') next.setMonth(next.getMonth() + 3);
+        if (freqVal === 'ANNUELLE') next.setFullYear(next.getFullYear() + 1);
+        const iso = next.toISOString().slice(0, 10);
+        recNext.value = iso;
+        if (nextGenPill) nextGenPill.textContent = iso || '—';
+    }
+
+    if (typeSelect) {
+        typeSelect.addEventListener('change', toggleRecurrenceFields);
+        toggleRecurrenceFields();
+    }
+    if (recStart) recStart.addEventListener('change', computeNextGeneration);
+    if (recFreq)  recFreq.addEventListener('change', computeNextGeneration);
+    computeNextGeneration();
 })();
 </script>
 {% endblock %}

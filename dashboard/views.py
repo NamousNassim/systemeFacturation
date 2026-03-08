@@ -277,6 +277,7 @@ def facture_create(request):
             facture.save()
             formset.instance = facture
             formset.save()
+            facture.recompute_totals(save=True)
             messages.success(request, f'Facture {facture.numero} créée avec succès.')
             return redirect('dashboard:facture_list')
         else:
@@ -295,8 +296,9 @@ def facture_update(request, pk):
     formset = LigneFactureFormSet(request.POST or None, instance=facture)
     if request.method == 'POST':
         if form.is_valid() and formset.is_valid():
-            form.save()
+            facture = form.save()
             formset.save()
+            facture.recompute_totals(save=True)
             messages.success(request, 'Facture mise à jour.')
             return redirect('dashboard:facture_list')
     return render(request, 'dashboard/factures/form.html', {

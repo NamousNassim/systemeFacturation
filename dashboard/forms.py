@@ -78,11 +78,17 @@ class FactureForm(StyledFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Le champ source n'est pas destiné à être saisi côté UI
-        self.fields['source_recurring'].widget.attrs.setdefault('readonly', True)
+        self.fields['source_recurring'].widget = forms.HiddenInput()
         self.fields['source_recurring'].required = False
         # Prochaine génération est calculée côté backend
         self.fields['recurrence_prochaine'].disabled = True
         self.fields['recurrence_prochaine'].required = False
+        # Montant HT est calculé à partir des lignes côté front + recalcul backend
+        self.fields['montant_ht'].widget.attrs.setdefault('readonly', True)
+
+    def clean_source_recurring(self):
+        val = self.cleaned_data.get('source_recurring')
+        return val or None
 
     class Meta:
         model = Facture
@@ -140,21 +146,6 @@ class LigneFactureForm(StyledFormMixin, forms.ModelForm):
         widgets = {
             'item_type': forms.HiddenInput(),
         }
-
-
-class FactureForm(StyledFormMixin, forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Le champ source n'est pas destiné à être saisi côté UI
-        self.fields['source_recurring'].widget.attrs.setdefault('readonly', True)
-        self.fields['source_recurring'].required = False
-        # Prochaine génération est calculée côté backend
-        self.fields['recurrence_prochaine'].disabled = True
-        self.fields['recurrence_prochaine'].required = False
-
-    def clean_source_recurring(self):
-        val = self.cleaned_data.get('source_recurring')
-        return val or None
 
 
 LigneFactureFormSet = forms.inlineformset_factory(
