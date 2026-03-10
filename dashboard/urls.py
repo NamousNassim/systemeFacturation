@@ -12,6 +12,7 @@ urlpatterns = [
     path("clients/ajouter/",          views.ClientCreateView.as_view(), name="client_create"),
     path("clients/<int:pk>/",         views.client_detail,             name="client_detail"),
     path("clients/<int:pk>/modifier/",views.ClientUpdateView.as_view(), name="client_update"),
+    path("clients/<int:pk>/supprimer/",views.client_delete,             name="client_delete"),
 
     # Prospects
     path("prospects/",                   views.ProspectListView.as_view(),   name="prospect_list"),
@@ -25,7 +26,11 @@ urlpatterns = [
     path("factures/<int:pk>/modifier/", views.facture_update,            name="facture_update"),
     path("factures/<int:pk>/pdf/",      views.facture_pdf,               name="facture_pdf"),
     path("factures/<int:pk>/renvoyer/", views.facture_resend,            name="facture_resend"),
+    path("factures/<int:pk>/supprimer/", views.facture_delete,           name="facture_delete"),
 
     # Notifications / historique envois
     path("notifications/",              views.notifications,             name="notifications"),
+
+    # Administration / gestion interne
+    path("ajouter-employee/",           views.employee_create,           name="employee_create"),
 ]

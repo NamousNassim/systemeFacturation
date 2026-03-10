@@ -101,6 +101,15 @@
                                class="btn btn--ghost btn--sm">Voir</a>
                             <a href="{% url 'dashboard:client_update' client.pk %}"
                                class="btn btn--secondary btn--sm">Modifier</a>
+                            {% if request.user.is_superuser or request.user.role == "ADMIN" or request.user.role == "RECOVEREMENT" %}
+                            <button type="button"
+                                    class="btn btn--danger btn--sm"
+                                    data-delete-url="{% url 'dashboard:client_delete' client.pk %}"
+                                    data-entity="le client {{ client }}"
+                                    onclick="openDeleteModal(this)">
+                                Supprimer
+                            </button>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
@@ -166,4 +175,68 @@
     {% endif %}
 </div>
 
+<!-- Modal confirmation suppression -->
+<div id="delete-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+    <div class="w-[440px] max-w-[92vw] rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-rose-500 via-amber-500 to-orange-500 text-white">
+            <div class="h-11 w-11 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M3 6h18"/>
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    <path d="m10 11 1 8m2-8-1 8"/>
+                    <path d="M5 6h14l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2Z"/>
+                </svg>
+            </div>
+            <div>
+                <p class="text-xs uppercase tracking-[0.24em] text-amber-100 font-semibold">Confirmation</p>
+                <p class="text-sm font-semibold">Supprimer cet élément</p>
+            </div>
+        </div>
+        <div class="px-5 py-5 space-y-2">
+            <p id="delete-modal-text" class="text-slate-800 font-semibold"></p>
+            <p class="text-slate-500 text-sm">Cette action est irréversible. Les données supprimées ne pourront pas être restaurées.</p>
+        </div>
+        <div class="px-5 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+            <button type="button" id="delete-cancel" class="btn btn--secondary btn--sm">Annuler</button>
+            <form method="post" id="delete-form" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn--danger btn--sm">Supprimer</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const modal = document.getElementById('delete-modal');
+    const textEl = document.getElementById('delete-modal-text');
+    const form = document.getElementById('delete-form');
+    const cancelBtn = document.getElementById('delete-cancel');
+
+    function closeModal() {
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    window.openDeleteModal = function (btn) {
+        if (!modal || !form || !textEl || !btn) return;
+        const url = btn.getAttribute('data-delete-url');
+        const entity = btn.getAttribute('data-entity') || 'cet élément';
+        textEl.textContent = `Confirmer la suppression de ${entity} ?`;
+        form.action = url;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    };
+
+    cancelBtn && cancelBtn.addEventListener('click', closeModal);
+    modal && modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+})();
+</script>
 {% endblock %}

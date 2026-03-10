@@ -1,10 +1,12 @@
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Q, Sum, Count
+from django.db.models.deletion import ProtectedError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.template.loader import render_to_string
 from django.views.generic import ListView, CreateView, UpdateView
 from django.utils import timezone
@@ -19,6 +21,12 @@ from .models import (
 )
 from .forms import ClientForm, ProspectForm, FactureForm, LigneFactureFormSet
 from .services import compute_invoice_totals, send_invoice_email
+from accounts.forms import EmployeeCreateForm
+from accounts.models import UserRole
+
+
+def _can_manage_deletion(user):
+    return user.is_superuser or getattr(user, "role", "") in [UserRole.ADMIN, UserRole.RECOVEREMENT]
 
 
 # ── DASHBOARD ──────────────────────────────────────────────────────────────────
@@ -406,4 +414,51 @@ def notifications(request):
     return render(request, 'dashboard/notifications/list.html', {
         'page_obj': page,
         'status_filter': status,
+    })
+
+
+# â€”â€”â€” Suppressions clients / factures (admin ou recouvrement) â€”â€”â€” #
+@login_required
+@require_POST
+def client_delete(request, pk):
+    if not _can_manage_deletion(request.user):
+        return HttpResponseForbidden("Suppression réservée à l'administrateur et au recouvrement.")
+
+    client = get_object_or_404(Client, pk=pk)
+    try:
+        client.delete()
+        messages.success(request, f"Client « {client} » supprimé.")
+    except ProtectedError:
+        messages.error(request, "Impossible de supprimer ce client car des factures sont associées.")
+    return redirect('dashboard:client_list')
+
+
+@login_required
+@require_POST
+def facture_delete(request, pk):
+    if not _can_manage_deletion(request.user):
+        return HttpResponseForbidden("Suppression réservée à l'administrateur et au recouvrement.")
+
+    facture = get_object_or_404(Facture, pk=pk)
+    numero = facture.numero
+    facture.delete()
+    messages.success(request, f"Facture {numero} supprimée.")
+    return redirect('dashboard:facture_list')
+
+
+# ── Administration : création d'employés (superuser uniquement) ──────────────
+@login_required
+def employee_create(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Accès réservé à l'administrateur.")
+
+    form = EmployeeCreateForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        employee = form.save()
+        display_name = employee.get_full_name() or employee.email
+        messages.success(request, f"Employé {display_name} créé avec succès.")
+        return redirect('dashboard:employee_create')
+
+    return render(request, 'dashboard/employees/create.html', {
+        'form': form,
     })

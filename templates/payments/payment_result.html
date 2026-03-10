@@ -1,0 +1,46 @@
+{% extends "base_app.html" %}
+
+{% block title %}Résultat du paiement{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard:home' %}" class="text-slate-400 hover:text-slate-600 transition">Tableau de bord</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<a href="{% url 'dashboard:facture_list' %}" class="text-slate-400 hover:text-slate-600 transition">Factures</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<a href="{% url 'dashboard:facture_detail' payment.facture.pk %}" class="text-slate-400 hover:text-slate-600 transition">{{ payment.facture.numero }}</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<span class="font-semibold text-slate-800">Résultat paiement</span>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <div class="card card-body">
+        <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-semibold mb-1">Résultat du paiement</p>
+        <h1 class="text-2xl font-bold text-slate-900 mb-2">{{ payment.get_status_display }}</h1>
+
+        <dl class="grid grid-cols-2 gap-3 text-sm">
+            <div>
+                <dt class="text-slate-400">Facture</dt>
+                <dd class="font-semibold text-slate-800">{{ payment.facture.numero }}</dd>
+            </div>
+            <div>
+                <dt class="text-slate-400">Montant</dt>
+                <dd class="font-semibold text-emerald-700 text-money">{{ payment.amount|floatformat:2 }} {{ payment.currency }}</dd>
+            </div>
+            <div>
+                <dt class="text-slate-400">Référence transaction</dt>
+                <dd class="font-mono text-sm text-slate-700">{{ payment.merchant_txn_id }}</dd>
+            </div>
+            <div>
+                <dt class="text-slate-400">Date paiement</dt>
+                <dd class="text-slate-700">{% if payment.paid_at %}{{ payment.paid_at|date:"d/m/Y H:i" }}{% else %}—{% endif %}</dd>
+            </div>
+        </dl>
+
+        <div class="mt-4 flex gap-2">
+            <a href="{% url 'dashboard:facture_detail' payment.facture.pk %}" class="btn btn--primary">Retour à la facture</a>
+            <a href="{% url 'dashboard:facture_list' %}" class="btn btn--ghost">Retour aux factures</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,22 +1,22 @@
 {% load static %}
 
-<!-- â”€â”€ Logo / Brand â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ── Logo / Brand ───────────────────────────────────────── -->
 <div class="flex h-[60px] flex-shrink-0 items-center gap-2.5 border-b border-white/[0.07] px-4">
     <div class="h-8 w-8 flex-shrink-0 overflow-hidden rounded-lg bg-white/10 p-1">
-        <img src="{% static 'images/mccglogo.png' %}" alt="MCCG"
-             class="h-full w-full object-contain">
+        <img src="{% static 'images/mccglogo.png' %}" alt="MCCG" class="h-full w-full object-contain">
     </div>
     <div class="min-w-0">
         <p class="text-[9.5px] font-bold uppercase tracking-[0.2em] text-blue-400">MCCG</p>
         <p class="truncate text-[13px] font-semibold leading-tight text-white">CRM Suite</p>
     </div>
-</div>
+ </div>
 
-<!-- â”€â”€ Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ── Navigation ─────────────────────────────────────────── -->
 <nav class="sidebar-nav flex-1 overflow-y-auto px-2.5 py-3.5 space-y-0.5">
 
     <p class="mb-2 px-2.5 text-[9px] font-bold uppercase tracking-[0.24em] text-slate-500">Principal</p>
 
+    {% if request.user.role != "RECOVEREMENT" %}
     <a href="{% url 'dashboard:home' %}"
        class="sidebar-link {% if request.resolver_match.url_name == 'home' %}sidebar-link--active{% endif %}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -28,6 +28,7 @@
         </svg>
         <span>Tableau de bord</span>
     </a>
+    {% endif %}
 
     <a href="{% url 'dashboard:client_list' %}"
        class="sidebar-link {% if 'client' in request.resolver_match.url_name %}sidebar-link--active{% endif %}">
@@ -41,6 +42,7 @@
         <span>Clients</span>
     </a>
 
+    {% if request.user.role != "RECOVEREMENT" %}
     <a href="{% url 'dashboard:prospect_list' %}"
        class="sidebar-link {% if 'prospect' in request.resolver_match.url_name %}sidebar-link--active{% endif %}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -49,6 +51,7 @@
         </svg>
         <span>Prospects</span>
     </a>
+    {% endif %}
 
     <a href="{% url 'dashboard:facture_list' %}"
        class="sidebar-link {% if 'facture' in request.resolver_match.url_name %}sidebar-link--active{% endif %}">
@@ -77,18 +80,33 @@
         <span>Notifications</span>
     </a>
 
+    {% if request.user.is_superuser %}
+    <a href="{% url 'dashboard:employee_create' %}"
+       class="sidebar-link {% if request.resolver_match.url_name == 'employee_create' %}sidebar-link--active{% endif %}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20a6 6 0 0 1 16 0"/>
+            <path d="M19 8h3m-1.5-1.5V9.5"/>
+        </svg>
+        <span>Ajouter employé</span>
+    </a>
+    {% endif %}
+
+    {% if request.user.role != "RECOVEREMENT" %}
     <a href="#" class="sidebar-link">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l-.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
             <circle cx="12" cy="12" r="3"/>
         </svg>
         <span>Paramètres</span>
     </a>
+    {% endif %}
 
 </nav>
 
-<!-- â”€â”€ User footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<!-- ── User footer ────────────────────────────────────────── -->
 <div class="flex-shrink-0 border-t border-white/[0.07] px-3 py-3">
     <div class="flex items-center gap-2.5">
         <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full

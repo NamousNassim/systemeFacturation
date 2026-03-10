@@ -1,0 +1,108 @@
+{% extends "base_app.html" %}
+
+{% block title %}Ajouter un employé{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard:home' %}" class="text-slate-400 hover:text-slate-600 transition">Tableau de bord</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none"
+     stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<span class="font-semibold text-slate-800">Ajouter un employé</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-2xl">
+
+    <div class="mb-6">
+        <h1 class="page-title">Créer un employé</h1>
+        <p class="text-sm text-slate-500 mt-1">Accès réservé à l'administrateur (superuser). Seuls les rôles Recouvrement ou Marketing peuvent être attribués ici.</p>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="card card-body mb-4">
+            <p class="form-section-title">Identité</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div>
+                    <label class="form-label">{{ form.first_name.label }}</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <p class="form-error">{{ form.first_name.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="form-label">{{ form.last_name.label }}</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <p class="form-error">{{ form.last_name.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="form-label">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <p class="form-error">{{ form.email.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card card-body mb-4">
+            <p class="form-section-title">Rôle</p>
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="form-label">{{ form.role.label }}</label>
+                    {{ form.role }}
+                    <p class="form-hint">Choisir entre Recouvrement ou Marketing.</p>
+                    {% if form.role.errors %}
+                        <p class="form-error">{{ form.role.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-body mb-6">
+            <p class="form-section-title">Sécurité</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="form-label">{{ form.password1.label }}</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <p class="form-error">{{ form.password1.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="form-label">{{ form.password2.label }}</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <p class="form-error">{{ form.password2.errors|striptags }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <p class="form-hint mt-3">Le mot de passe doit respecter la politique de sécurité définie dans l'application.</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button type="submit" class="btn btn--primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+                Créer l'employé
+            </button>
+            <a href="{% url 'dashboard:home' %}" class="btn btn--secondary">Retour</a>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

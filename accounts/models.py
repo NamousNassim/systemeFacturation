@@ -7,6 +7,8 @@ class UserRole(models.TextChoices):
     MANAGER = "MANAGER", "Manager"
     ACCOUNTANT = "ACCOUNTANT", "Accountant"
     SALES = "SALES", "Sales"
+    RECOVEREMENT = "RECOVEREMENT", "Recouvrement"
+    MARKETING = "MARKETING", "Marketing"
     EMPLOYEE = "EMPLOYEE", "Employee"
 
 

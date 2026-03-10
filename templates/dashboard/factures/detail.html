@@ -175,6 +175,12 @@
            class="btn btn--secondary w-full justify-center">
             Modifier la facture
         </a>
+        {% if facture.statut != 'PAYEE' %}
+        <a href="{% url 'payments:start_payment' facture.pk %}"
+           class="btn btn--primary w-full justify-center">
+            Payer la facture
+        </a>
+        {% endif %}
         {% if facture.statut == 'ENVOYEE' and facture.client.email %}
         <a href="{% url 'dashboard:facture_resend' facture.pk %}"
            class="btn btn--primary w-full justify-center">

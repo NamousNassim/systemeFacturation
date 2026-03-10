@@ -1,0 +1,50 @@
+{% extends "base_app.html" %}
+
+{% block title %}Paiement test{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard:home' %}" class="text-slate-400 hover:text-slate-600 transition">Tableau de bord</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<a href="{% url 'dashboard:facture_list' %}" class="text-slate-400 hover:text-slate-600 transition">Factures</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<a href="{% url 'dashboard:facture_detail' facture.pk %}" class="text-slate-400 hover:text-slate-600 transition">{{ facture.numero }}</a>
+<svg class="mx-1 text-slate-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+<span class="font-semibold text-slate-800">Paiement test</span>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <div class="card card-body">
+        <p class="text-xs uppercase tracking-[0.18em] text-slate-400 font-semibold mb-1">Paiement de facture (mode test)</p>
+        <h1 class="text-xl font-semibold text-slate-900 mb-2">Facture {{ facture.numero }}</h1>
+        <dl class="grid grid-cols-2 gap-3 text-sm">
+            <div>
+                <dt class="text-slate-400">Client</dt>
+                <dd class="font-semibold text-slate-800">{{ facture.client }}</dd>
+            </div>
+            <div>
+                <dt class="text-slate-400">Montant</dt>
+                <dd class="font-semibold text-emerald-700 text-money">{{ facture.total_ttc|floatformat:2 }} MAD</dd>
+            </div>
+            <div>
+                <dt class="text-slate-400">Référence transaction</dt>
+                <dd class="font-mono text-sm text-slate-700">{{ payment.merchant_txn_id }}</dd>
+            </div>
+            <div>
+                <dt class="text-slate-400">Statut actuel</dt>
+                <dd class="font-semibold text-slate-800">{{ payment.get_status_display }}</dd>
+            </div>
+        </dl>
+    </div>
+
+    <div class="card card-body space-y-3">
+        <p class="text-sm text-slate-600">Simuler un résultat de paiement :</p>
+        <div class="flex flex-col sm:flex-row gap-2">
+            <a class="btn btn--primary flex-1 text-center" href="{% url 'payments:payment_success' payment.pk %}">Simuler paiement réussi</a>
+            <a class="btn btn--secondary flex-1 text-center" href="{% url 'payments:payment_fail' payment.pk %}">Simuler échec</a>
+            <a class="btn btn--ghost flex-1 text-center" href="{% url 'payments:payment_cancel' payment.pk %}">Simuler annulation</a>
+        </div>
+        <p class="text-xs text-slate-500">Mode test uniquement. Aucun paiement réel n'est effectué.</p>
+    </div>
+</div>
+{% endblock %}
