@@ -33,6 +33,11 @@ def _can_manage_deletion(user):
     return user.is_superuser or getattr(user, "role", "") in [UserRole.ADMIN, UserRole.RECOVEREMENT]
 
 
+def _can_edit_invoice(user):
+    """Autorise uniquement Admin ou Recouvrement à modifier une facture."""
+    return user.is_superuser or getattr(user, "role", "") in [UserRole.ADMIN, UserRole.RECOVEREMENT]
+
+
 def _quantize(value: Decimal) -> Decimal:
     """Arrondit au centime avec HALF_UP pour rester cohérent avec les totaux PDF."""
     return value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
@@ -445,6 +450,9 @@ def facture_create(request):
 
 @login_required
 def facture_update(request, pk):
+    if not _can_edit_invoice(request.user):
+        return HttpResponseForbidden("Modification réservée à l'administrateur et au recouvrement.")
+
     facture = get_object_or_404(Facture, pk=pk)
     form    = FactureForm(request.POST or None, instance=facture)
     formset = LigneFactureFormSet(request.POST or None, instance=facture)
