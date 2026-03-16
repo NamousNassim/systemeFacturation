@@ -564,8 +564,14 @@ def facture_delete(request, pk):
 
     facture = get_object_or_404(Facture, pk=pk)
     numero = facture.numero
-    facture.delete()
-    messages.success(request, f"Facture {numero} supprimée.")
+    try:
+        facture.delete()
+        messages.success(request, f"Facture {numero} supprimée.")
+    except ProtectedError:
+        messages.error(
+            request,
+            "Impossible de supprimer cette facture : des paiements ou objets liés la protègent."
+        )
     return redirect('dashboard:facture_list')
 
 
