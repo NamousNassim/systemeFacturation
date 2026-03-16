@@ -38,6 +38,23 @@ def _quantize(value: Decimal) -> Decimal:
     return value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
 
+def _next_facture_numero():
+    """Calcule le prochain numéro de facture sans créer d'objet."""
+    year = timezone.now().year
+    base_seq = 288 if year == 2026 else 1
+    last = Facture.objects.filter(numero__startswith=f"FAC-{year}-").order_by('numero').last()
+    if last:
+        try:
+            seq = int(last.numero.split('-')[-1]) + 1
+        except (ValueError, IndexError):
+            seq = base_seq
+    else:
+        seq = base_seq
+    if seq < base_seq:
+        seq = base_seq
+    return f"FAC-{year}-{seq:04d}"
+
+
 def _build_preview_pdf(form, formset):
     """
     Génère un PDF en mémoire à partir des données du formulaire sans rien persister.
@@ -367,6 +384,7 @@ def facture_create(request):
     form    = FactureForm(request.POST or None)
     formset = LigneFactureFormSet(request.POST or None)
     preview_pdf = None
+    next_numero = _next_facture_numero()
     is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
 
     if request.method == 'POST':
@@ -421,6 +439,7 @@ def facture_create(request):
         'action': 'Nouvelle facture', 'submit_label': 'Créer la facture',
         'preview_pdf': preview_pdf,
         'preview_mode': bool(preview_pdf),
+        'next_numero': next_numero,
     })
 
 

@@ -194,13 +194,18 @@ class Facture(models.Model):
             last = Facture.objects.filter(
                 numero__startswith=f"FAC-{year}-"
             ).order_by('numero').last()
+            base_seq = 288 if year == 2026 else 1
             if last:
                 try:
                     seq = int(last.numero.split('-')[-1]) + 1
                 except (ValueError, IndexError):
-                    seq = 1
+                    seq = base_seq
             else:
-                seq = 1
+                # Démarre à FAC-2026-0288 uniquement pour 2026, sinon FAC-YYYY-0001
+                seq = base_seq
+            # Garantit qu'on ne repasse jamais sous la séquence de départ de l'année
+            if seq < base_seq:
+                seq = base_seq
             self.numero = f"FAC-{year}-{seq:04d}"
 
         # Initialiser la prochaine génération pour les modèles récurrents

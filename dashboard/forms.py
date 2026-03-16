@@ -1,4 +1,5 @@
 from django import forms
+from django.utils import timezone
 from .models import Client, Prospect, Facture, LigneFacture
 
 
@@ -85,6 +86,11 @@ class FactureForm(StyledFormMixin, forms.ModelForm):
         self.fields['recurrence_prochaine'].required = False
         # Montant HT est calculé à partir des lignes côté front + recalcul backend
         self.fields['montant_ht'].widget.attrs.setdefault('readonly', True)
+        # Valeur par défaut : échéance = date d'émission (modifiable par l'utilisateur)
+        if not self.is_bound and not getattr(self.instance, "pk", None):
+            emission = self.initial.get('date_emission') or timezone.now().date()
+            self.initial.setdefault('date_emission', emission)
+            self.initial.setdefault('date_echeance', emission)
 
     def clean_source_recurring(self):
         val = self.cleaned_data.get('source_recurring')
