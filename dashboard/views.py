@@ -7,6 +7,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db.models import Q, Sum, Count
+from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -565,7 +566,10 @@ def facture_delete(request, pk):
     facture = get_object_or_404(Facture, pk=pk)
     numero = facture.numero
     try:
-        facture.delete()
+        with transaction.atomic():
+            # Supprime d'abord les paiements rattachés (et leurs événements en cascade)
+            facture.paiements.all().delete()
+            facture.delete()
         messages.success(request, f"Facture {numero} supprimée.")
     except ProtectedError:
         messages.error(
