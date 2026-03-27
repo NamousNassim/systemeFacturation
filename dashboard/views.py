@@ -27,7 +27,7 @@ from .models import (
     Facture, FactureStatut, LigneFacture, FactureEmailLog,
 )
 from .forms import ClientForm, ProspectForm, FactureForm, LigneFactureFormSet
-from .services import compute_invoice_totals, send_invoice_email
+from .services import build_invoice_pdf_context, compute_invoice_totals, send_invoice_email
 from accounts.forms import EmployeeCreateForm
 from accounts.models import UserRole
 
@@ -109,13 +109,7 @@ def _build_preview_pdf(form, formset):
     facture.tva_amount = _quantize(taxable_subtotal * (facture.tva_rate / Decimal('100')))
     facture.total_ttc = _quantize(facture.subtotal_ht + facture.tva_amount)
 
-    context = {
-        "facture": facture,
-        "client": facture.client,
-        "lignes": lignes_normales,
-        "debours": lignes_debours,
-        "today": timezone.now().date(),
-    }
+    context = build_invoice_pdf_context(facture, lignes_normales, lignes_debours)
 
     html = render_to_string("invoices/invoice_pdf.html", context)
     result = BytesIO()
@@ -929,16 +923,9 @@ def facture_pdf(request, pk):
 
     facture = get_object_or_404(Facture.objects.select_related('client'), pk=pk)
     facture = compute_invoice_totals(facture)
-    lignes  = facture.lignes.filter(item_type='NORMAL')
-    debours = facture.lignes.filter(item_type='DEBOURS')
-
-    context = {
-        "facture": facture,
-        "client": facture.client,
-        "lignes": lignes,
-        "debours": debours,
-        "today": timezone.now().date(),
-    }
+    lignes = list(facture.lignes.filter(item_type='NORMAL'))
+    debours = list(facture.lignes.filter(item_type='DEBOURS'))
+    context = build_invoice_pdf_context(facture, lignes, debours)
 
     html = render_to_string("invoices/invoice_pdf.html", context)
     result = BytesIO()

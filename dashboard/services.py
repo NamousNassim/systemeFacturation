@@ -42,6 +42,22 @@ def compute_invoice_totals(facture):
     return facture
 
 
+def build_invoice_pdf_context(facture, lignes, debours):
+    line_count = len(lignes) + len(debours) + (1 if debours else 0)
+    compact_mode = line_count >= 10
+    ultra_compact_mode = line_count >= 16
+    return {
+        "facture": facture,
+        "client": facture.client,
+        "lignes": lignes,
+        "debours": debours,
+        "today": timezone.now().date(),
+        "line_count": line_count,
+        "compact_mode": compact_mode,
+        "ultra_compact_mode": ultra_compact_mode,
+    }
+
+
 # ——— Récurrence ———
 
 def _add_months(base_date: date, months: int) -> date:
@@ -170,16 +186,9 @@ def render_invoice_pdf_bytes(facture: Facture) -> bytes | None:
         return None
 
     facture = compute_invoice_totals(facture)
-    lignes  = facture.lignes.filter(item_type='NORMAL')
-    debours = facture.lignes.filter(item_type='DEBOURS')
-
-    context = {
-        "facture": facture,
-        "client": facture.client,
-        "lignes": lignes,
-        "debours": debours,
-        "today": timezone.now().date(),
-    }
+    lignes = list(facture.lignes.filter(item_type='NORMAL'))
+    debours = list(facture.lignes.filter(item_type='DEBOURS'))
+    context = build_invoice_pdf_context(facture, lignes, debours)
 
     html = render_to_string("invoices/invoice_pdf.html", context)
     result = BytesIO()
