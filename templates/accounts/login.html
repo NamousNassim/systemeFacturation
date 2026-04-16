@@ -4,30 +4,28 @@
 {% block title %}Connexion{% endblock %}
 
 {% block content %}
-<div class="min-h-[78vh] px-4 py-10 sm:px-6 lg:px-10 flex items-center justify-center">
-    <div class="w-full max-w-6xl grid gap-8 lg:grid-cols-2">
-
-        <!-- Colonne formulaire -->
-        <div class="rounded-3xl bg-white shadow-2xl shadow-brand-100/70 border border-slate-200 p-8 sm:p-10">
-            <div class="flex items-center gap-3 mb-8">
-                <div class="h-12 w-12 rounded-2xl overflow-hidden bg-white border border-slate-200 flex items-center justify-center">
-                    <img src="{% static 'images/mccglogo.png' %}" alt="MCCG" class="h-full w-full object-contain">
+<section class="login-page">
+    <div class="login-layout">
+        <div class="login-card">
+            <div class="login-card__brand">
+                <div class="login-card__logo">
+                    <img src="{% static 'images/mccglogo.png' %}" alt="MCCG" class="login-card__logo-image">
                 </div>
                 <div>
-                    <p class="text-[11px] font-bold uppercase tracking-[0.24em] text-brand-600">MCCG</p>
-                    <p class="text-base font-semibold text-ink leading-tight">Client & Facturation Suite</p>
+                    <p class="login-card__eyebrow">MCCG</p>
+                    <p class="login-card__suite">Client & Facturation Suite</p>
                 </div>
             </div>
 
-            <div class="space-y-2 mb-6">
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Accès sécurisé</p>
-                <h1 class="text-3xl font-semibold text-ink">Connexion à votre espace</h1>
-                <p class="text-sm text-slate-600">Retrouvez vos clients, factures et pipeline en un seul endroit.</p>
+            <div class="login-card__intro">
+                <p class="login-card__kicker">Accès sécurisé</p>
+                <h1 class="login-card__title">Connexion à votre espace</h1>
+                <p class="login-card__description">Retrouvez vos clients, factures et pipeline en un seul endroit.</p>
             </div>
 
             {% if form.non_field_errors %}
-                <div class="mb-5 flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                    <svg class="mt-0.5 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <div class="alert alert--error">
+                    <svg class="alert__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="12" r="10"></circle>
                         <path d="M12 8v5m0 4h.01"></path>
                     </svg>
@@ -35,44 +33,46 @@
                 </div>
             {% endif %}
 
-            <form method="post" class="space-y-5" novalidate>
+            <form method="post" class="login-form" novalidate>
                 {% csrf_token %}
 
-                <div class="space-y-2">
-                    <label for="{{ form.username.id_for_label }}" class="text-sm font-semibold text-ink">Adresse email</label>
-                    <input type="email"
-                           name="{{ form.username.name }}"
-                           id="{{ form.username.id_for_label }}"
-                           value="{{ form.username.value|default_if_none:'' }}"
-                           autocomplete="email"
-                           required
-                           placeholder="votre@email.com"
-                           class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-[15px] text-ink shadow-inner shadow-slate-100 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition">
+                <div class="field-group">
+                    <label for="{{ form.username.id_for_label }}" class="field-label">Adresse email</label>
+                    <input
+                        type="email"
+                        name="{{ form.username.name }}"
+                        id="{{ form.username.id_for_label }}"
+                        value="{{ form.username.value|default_if_none:'' }}"
+                        autocomplete="email"
+                        required
+                        placeholder="votre@email.com"
+                        class="field-input">
                     {% if form.username.errors %}
-                        <p class="text-sm text-rose-600">{{ form.username.errors|striptags }}</p>
+                        <p class="field-error">{{ form.username.errors|striptags }}</p>
                     {% endif %}
                 </div>
 
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <label for="{{ form.password.id_for_label }}" class="text-sm font-semibold text-ink">Mot de passe</label>
-                        <a href="#" class="text-xs font-semibold text-brand-600 hover:text-brand-700">Mot de passe oublié ?</a>
+                <div class="field-group">
+                    <div class="field-row">
+                        <label for="{{ form.password.id_for_label }}" class="field-label">Mot de passe</label>
+                        <a href="#" class="field-link">Mot de passe oublié ?</a>
                     </div>
-                    <input type="password"
-                           name="{{ form.password.name }}"
-                           id="{{ form.password.id_for_label }}"
-                           autocomplete="current-password"
-                           required
-                           placeholder="••••••••"
-                           class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-[15px] text-ink shadow-inner shadow-slate-100 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition">
+                    <input
+                        type="password"
+                        name="{{ form.password.name }}"
+                        id="{{ form.password.id_for_label }}"
+                        autocomplete="current-password"
+                        required
+                        placeholder="••••••••"
+                        class="field-input">
                     {% if form.password.errors %}
-                        <p class="text-sm text-rose-600">{{ form.password.errors|striptags }}</p>
+                        <p class="field-error">{{ form.password.errors|striptags }}</p>
                     {% endif %}
                 </div>
 
-                <div class="pt-2">
-                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 text-white px-4 py-3 text-[15px] font-semibold shadow-lg shadow-brand-200/70 hover:-translate-y-[1px] transition">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <div class="login-form__actions">
+                    <button type="submit" class="button button--primary button--full button--large">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
                             <polyline points="10 17 15 12 10 7"/>
                             <line x1="15" y1="12" x2="3" y2="12"/>
@@ -82,60 +82,58 @@
                 </div>
             </form>
 
-            <div class="mt-6 flex items-center gap-2 text-xs text-slate-500">
-                <span class="h-[1px] flex-1 bg-slate-200"></span>
+            <div class="login-card__footer">
+                <span class="login-card__footer-line"></span>
                 <span>Sécurisé par MCCG</span>
-                <span class="h-[1px] flex-1 bg-slate-200"></span>
+                <span class="login-card__footer-line"></span>
             </div>
         </div>
 
-        <!-- Colonne information -->
-        <div class="rounded-3xl bg-[#0d1b38] text-white p-8 sm:p-10 flex flex-col justify-between shadow-2xl shadow-slate-900/30">
-            <div class="space-y-6">
-                <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold tracking-wide text-white/80">
-                    <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    CRM MCCG — Facturation & Pilotage
-                </span>
-                <div class="space-y-3">
-                    <h2 class="text-2xl font-semibold leading-snug">Suite de facturation et CRM unifiée.</h2>
-                    <p class="text-sm text-white/65 leading-relaxed max-w-md">
-                        Gérez vos clients, factures et encaissements dans une interface soignée. Adaptée aux équipes financières et commerciales au Maroc.
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
-                        <p class="text-xs uppercase tracking-[0.18em] text-emerald-200 font-semibold">Fiabilité</p>
-                        <p class="text-lg font-semibold mt-1">Accès sécurisé</p>
-                        <p class="text-xs text-white/60 mt-1">Sessions chiffrées, rôles et permissions.</p>
-                    </div>
-                    <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
-                        <p class="text-xs uppercase tracking-[0.18em] text-emerald-200 font-semibold">Suivi</p>
-                        <p class="text-lg font-semibold mt-1">Factures & clients</p>
-                        <p class="text-xs text-white/60 mt-1">Pipeline, relances, statuts en temps réel.</p>
-                    </div>
-                </div>
-
-                <ul class="space-y-3 text-sm text-white/75">
-                    <li class="flex items-center gap-3">
-                        <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-ink">✓</span>
-                        Calcul TTC automatique (DH)
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-ink">✓</span>
-                        Vue Kanban des prospects et relances
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-ink">✓</span>
-                        Export et génération PDF prêts à envoyer
-                    </li>
-                </ul>
+        <aside class="login-panel" aria-label="Présentation de la plateforme">
+            <div class="login-panel__badge">
+                <span class="login-panel__badge-dot"></span>
+                CRM MCCG - Facturation & Pilotage
             </div>
 
-            <div class="pt-6 border-t border-white/10 text-xs text-white/50">
-                © {% now "Y" %} MCCG — Accès interne sécurisé.
+            <div class="login-panel__content">
+                <h2 class="login-panel__title">Suite de facturation et CRM unifiée.</h2>
+                <p class="login-panel__text">
+                    Gérez vos clients, factures et encaissements dans une interface soignée. Adaptée aux équipes financières et commerciales au Maroc.
+                </p>
             </div>
-        </div>
+
+            <div class="login-panel__stats">
+                <div class="stat-card">
+                    <p class="stat-card__label">Fiabilité</p>
+                    <p class="stat-card__value">Accès sécurisé</p>
+                    <p class="stat-card__text">Sessions chiffrées, rôles et permissions.</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-card__label">Suivi</p>
+                    <p class="stat-card__value">Factures & clients</p>
+                    <p class="stat-card__text">Pipeline, relances, statuts en temps réel.</p>
+                </div>
+            </div>
+
+            <ul class="feature-list">
+                <li class="feature-list__item">
+                    <span class="feature-list__icon">✓</span>
+                    Calcul TTC automatique (DH)
+                </li>
+                <li class="feature-list__item">
+                    <span class="feature-list__icon">✓</span>
+                    Vue Kanban des prospects et relances
+                </li>
+                <li class="feature-list__item">
+                    <span class="feature-list__icon">✓</span>
+                    Export et génération PDF prêts à envoyer
+                </li>
+            </ul>
+
+            <div class="login-panel__footer">
+                © {% now "Y" %} MCCG - Accès interne sécurisé.
+            </div>
+        </aside>
     </div>
-</div>
+</section>
 {% endblock %}

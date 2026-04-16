@@ -1,80 +1,42 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MCCG CRM{% endblock %}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'] },
-                    colors: {
-                        brand: {
-                            50: '#eef5ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                        },
-                        accent: '#10b981',
-                        ink: '#0f172a'
-                    }
-                }
-            }
-        }
-    </script>
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <style>
-        /* Fallback minimal styles if Tailwind CDN fails */
-        :root { font-family: 'Inter', 'Space Grotesk', 'Segoe UI', sans-serif; color: #0f172a; background: #f5f7fb; }
-        body { margin: 0; }
-        a { color: #2563eb; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        input, button, textarea, select { font: inherit; }
-        button { cursor: pointer; }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 </head>
-<body class="min-h-screen bg-[#f5f7fb] text-ink antialiased">
-    <div class="fixed inset-0 -z-10 opacity-70 pointer-events-none">
-        <div class="absolute -top-20 -left-10 h-72 w-72 rounded-full bg-brand-200 blur-3xl"></div>
-        <div class="absolute top-10 right-[-80px] h-80 w-80 rounded-full bg-emerald-200 blur-3xl"></div>
+<body>
+    <div class="public-bg" aria-hidden="true">
+        <div class="public-bg__blob public-bg__blob--left"></div>
+        <div class="public-bg__blob public-bg__blob--right"></div>
     </div>
 
-    <div class="min-h-screen flex flex-col">
-        <header class="sticky top-0 z-20 border-b border-slate-200/80 bg-white/80 backdrop-blur">
-            <div class="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4 gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="h-12 w-12 rounded-2xl overflow-hidden bg-white flex items-center justify-center">
-                        <img src="{% static 'images/mccglogo.png' %}" alt="MCCG" class="h-full w-full object-contain" loading="lazy">
+    <div class="public-shell">
+        <header class="public-header">
+            <div class="public-header__inner">
+                <div class="brand-lockup">
+                    <div class="brand-lockup__logo">
+                        <img src="{% static 'images/mccglogo.png' %}" alt="MCCG" class="brand-lockup__image" loading="lazy">
                     </div>
                     <div>
-                        <p class="text-xs uppercase tracking-[0.22em] text-brand-600 font-semibold">MCCG</p>
-                        <p class="text-base sm:text-lg font-semibold text-ink">Client & Facturation Suite</p>
+                        <p class="brand-lockup__eyebrow">MCCG</p>
+                        <p class="brand-lockup__title">Client & Facturation Suite</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="public-header__actions">
                     {% if user.is_authenticated %}
-                        <div class="text-right hidden sm:block">
-                            <p class="text-sm font-semibold text-ink">{{ user.get_full_name|default:user.email }}</p>
-                            <p class="text-xs text-slate-500">Connecté</p>
+                        <div class="public-header__user">
+                            <p class="public-header__user-name">{{ user.get_full_name|default:user.email }}</p>
+                            <p class="public-header__user-status">Connecté</p>
                         </div>
-                        <a href="{% url 'accounts:logout' %}" class="inline-flex items-center gap-2 rounded-xl bg-ink text-white px-3.5 py-2 text-sm font-semibold hover:-translate-y-[1px] shadow-md shadow-brand-200/60 transition">
+                        <a href="{% url 'accounts:logout' %}" class="button button--dark">
                             Déconnexion
                         </a>
                     {% else %}
-                        <a href="{% url 'accounts:login' %}" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 text-white px-3.5 py-2 text-sm font-semibold hover:-translate-y-[1px] shadow-md shadow-brand-200/60 transition">
+                        <a href="{% url 'accounts:login' %}" class="button button--primary">
                             Connexion
                         </a>
                     {% endif %}
@@ -82,11 +44,11 @@
             </div>
         </header>
 
-        <main id="page" class="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-10">
+        <main id="page" class="public-main">
             {% if messages %}
-                <div class="space-y-3 mb-6">
+                <div class="flash-stack">
                     {% for message in messages %}
-                        <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm">
+                        <div class="flash-message">
                             {{ message }}
                         </div>
                     {% endfor %}
